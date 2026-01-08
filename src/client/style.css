@@ -1,3 +1,5 @@
+/* Base layout */
+
 *,
 *::before,
 *::after {
@@ -5,360 +7,524 @@
 }
 
 :root {
-  --bg: #050814;
-  --surface: #0f1424;
-  --accent: #f6d365;
-  --accent-soft: rgba(246, 211, 101, 0.1);
-  --text: #f5f5fa;
-  --muted: #9da3c2;
-  --error: #ff6b81;
-  --radius-lg: 16px;
-  --radius-md: 8px;
-  --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.35);
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Helvetica Neue", Arial, sans-serif;
+  --bg-dark: #05020c;
+  --purple: #7b2cff;
+  --pink: #ff5fd9;
+  --blue: #2ddcff;
+  --text-main: #f7f2ff;
+  --text-muted: #b6a9d9;
+  --modal-bg: rgba(7, 4, 22, 0.96);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --backdrop-blur: 18px;
+  --radius-lg: 22px;
+  --radius-md: 14px;
+  --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.7);
+  --transition-fast: 180ms ease-out;
+  --transition-med: 260ms ease-out;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Inter", sans-serif;
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: var(--font-sans);
-  color: var(--text);
-  background: radial-gradient(circle at top, #18203a 0, #050814 55%, #02030a 100%);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Layout */
-
-.page {
-  min-height: 100vh;
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 32px 16px 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+.app {
   position: relative;
+  min-height: 100vh;
+  overflow: hidden;
 }
 
-/* Hero / crystal ball intro */
+/* Foreground layout */
+
+.content {
+  position: relative;
+  z-index: 3;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 18px 32px;
+}
 
 .hero {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-lg);
-  padding: 40px 22px 44px;
-  background: radial-gradient(circle at top, #1b2444 0, #050814 55%, #02030a 100%);
-  box-shadow: var(--shadow-soft);
-  border: 1px solid rgba(246, 211, 101, 0.25);
-  isolation: isolate;
-  animation: fadeIn 0.8s ease-out;
-}
-
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.orb {
-  position: absolute;
-  width: 320px;
-  height: 320px;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background:
-    radial-gradient(circle at 20% 20%, #fffbe6 0, transparent 45%),
-    radial-gradient(circle at 80% 30%, #fbc2eb 0, transparent 45%),
-    radial-gradient(circle at 30% 80%, #a18cd1 0, transparent 50%);
-  filter: blur(2px);
-  opacity: 0.9;
-  mix-blend-mode: screen;
-  animation: swirl 18s ease-in-out infinite alternate;
-}
-
-.orb--small {
-  width: 220px;
-  height: 220px;
-  opacity: 0.7;
-  background:
-    radial-gradient(circle at 15% 30%, #fff1a8 0, transparent 45%),
-    radial-gradient(circle at 70% 70%, #fda085 0, transparent 50%);
-  animation-duration: 22s;
-}
-
-.hero-content {
-  position: relative;
+  max-width: 420px;
   text-align: center;
-  z-index: 1;
 }
 
 .hero-title {
   margin: 0 0 8px;
-  font-size: 2.6rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-shadow: 0 0 24px rgba(0, 0, 0, 0.6);
-  opacity: 0;
-  animation: fadeInUp 1.4s ease-out forwards;
+  font-size: 32px;
+  letter-spacing: 0.05em;
 }
 
 .hero-subtitle {
-  margin: 0 0 22px;
-  color: var(--muted);
-  font-size: 0.98rem;
-  max-width: 360px;
-  margin-inline: auto;
-  opacity: 0;
-  animation: fadeInUp 1.4s ease-out 0.3s forwards;
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: var(--text-muted);
 }
 
-.hero-button {
-  max-width: 220px;
-  margin-inline: auto;
-  opacity: 0;
-  animation: fadeInUp 1.2s ease-out 0.6s forwards;
-}
+/* Galaxy background */
 
-/* Main card */
+/* Galaxy background with smooth flowing gradient animation */
 
-.card {
+.galaxy-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+  
+  /* Large gradient that will be animated via background-position */
   background: linear-gradient(
-      135deg,
-      rgba(246, 211, 101, 0.08),
-      rgba(255, 255, 255, 0.02)
-    ),
-    var(--surface);
-  border-radius: var(--radius-lg);
-  padding: 24px 20px 28px;
-  box-shadow: var(--shadow-soft);
-  border: 1px solid rgba(246, 211, 101, 0.25);
-  margin-top: 12px;
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.45s ease, transform 0.45s ease;
+    135deg,
+    #0a0218 0%,
+    #1d0942 15%,
+    #3d1470 30%,
+    #1d0942 45%,
+    #0a0218 60%,
+    #180634 75%,
+    #0a0218 100%
+  );
+  
+  /* Make the gradient 3x larger so we can move it smoothly */
+  background-size: 300% 300%;
+  
+  /* Animate the background position for smooth flowing effect */
+  animation: galaxy-flow 25s ease-in-out infinite alternate;
 }
 
-.card--hidden {
-  opacity: 0;
-  transform: translateY(10px);
-  pointer-events: none;
+@keyframes galaxy-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
-.card--visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
+/* Layered gradients for depth - now simpler and synced with main flow */
 
-.header {
-  text-align: center;
-  margin-bottom: 24px;
-}
-
-.title {
-  font-size: 1.6rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin: 0 0 6px;
-}
-
-.subtitle {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.card-body {
-  margin-top: 8px;
-}
-
-/* Form elements */
-
-.label {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-.helper {
-  margin: 0 0 8px;
-  font-size: 0.82rem;
-  color: var(--muted);
-}
-
-.input {
+.galaxy-gradient {
+  position: absolute;
   width: 100%;
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(5, 8, 20, 0.8);
-  color: var(--text);
-  padding: 10px 12px;
-  resize: vertical;
-  min-height: 80px;
-  font-family: inherit;
-  font-size: 0.98rem;
-  outline: none;
+  height: 100%;
+  top: 0;
+  left: 0;
+  filter: blur(35px);
+  opacity: 0.4;
+  mix-blend-mode: screen;
+  transform: translate3d(0, 0, 0);
 }
 
-.input::placeholder {
-  color: rgba(157, 163, 194, 0.85);
+/* Subtle purple-pink accents */
+
+.layer-1 {
+  background: radial-gradient(circle at 15% 85%, rgba(140, 70, 210, 0.6), transparent 55%);
+  animation: drift-1 30s ease-in-out infinite alternate;
 }
 
-.input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(246, 211, 101, 0.55);
+.layer-2 {
+  background: radial-gradient(circle at 85% 15%, rgba(200, 90, 230, 0.5), transparent 55%);
+  animation: drift-2 35s ease-in-out infinite alternate;
 }
+
+.layer-3 {
+  background: radial-gradient(circle at 50% 50%, rgba(80, 30, 150, 0.7), transparent 60%);
+  animation: drift-3 40s ease-in-out infinite alternate;
+}
+
+@keyframes drift-1 {
+  from {
+    transform: translate3d(-3%, 2%, 0) scale(1);
+    opacity: 0.3;
+  }
+  to {
+    transform: translate3d(3%, -3%, 0) scale(1.05);
+    opacity: 0.5;
+  }
+}
+
+@keyframes drift-2 {
+  from {
+    transform: translate3d(4%, -3%, 0) scale(1.02);
+    opacity: 0.35;
+  }
+  to {
+    transform: translate3d(-4%, 3%, 0) scale(1);
+    opacity: 0.45;
+  }
+}
+
+@keyframes drift-3 {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.4;
+  }
+  to {
+    transform: translate3d(2%, 3%, 0) scale(1.03);
+    opacity: 0.6;
+  }
+}
+
+/* Subtle star field - slower twinkle */
+
+.galaxy-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.5) 0, transparent 50%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.3) 0, transparent 50%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.2) 0, transparent 50%);
+  background-size: 2px 2px, 1px 1px, 1.5px 1.5px;
+  background-position: 0 0, 40px 60px, 130px 270px;
+  background-repeat: repeat;
+  opacity: 0.5;
+  mix-blend-mode: screen;
+  animation: star-twinkle 12s ease-in-out infinite alternate;
+}
+
+@keyframes star-twinkle {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+
 
 /* Buttons */
 
-.button {
-  margin-top: 14px;
-  width: 100%;
+.primary-btn {
+  position: relative;
   border: none;
   border-radius: 999px;
-  padding: 11px 16px;
-  background: radial-gradient(circle at top left, #fff1a8, #f6d365, #fda085);
-  color: #201313;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #0b0717;
+  background: radial-gradient(circle at 0% 0%, #ffffff 0, #f7e8ff 40%, #f0d1ff 75%);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.85) inset;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-med),
+    opacity var(--transition-fast);
 }
 
-.button:hover {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
+.primary-btn:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
 }
 
-.button:active {
-  transform: translateY(0);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+.primary-btn.full-width {
+  width: 100%;
 }
 
-.button:disabled {
-  opacity: 0.7;
-  cursor: default;
-  transform: none;
-  box-shadow: none;
+.btn-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Feedback + result */
-
-.status {
-  min-height: 18px;
-  margin: 10px 0 0;
-  font-size: 0.85rem;
-  color: var(--muted);
+/* Modal backdrop with animated smoke/mist effect */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 16px 28px;
+  
+  /* Transparent with mystical glow */
+  background: radial-gradient(
+    circle at 30% 0%, 
+    rgba(5, 2, 15, 0.25), 
+    rgba(1, 0, 8, 0.45)
+  );
+  
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  
+  /* Smooth ease-in transition */
+  transition: 
+    opacity 600ms cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  opacity: 1;
+  visibility: visible;
 }
 
-.status--error {
-  color: var(--error);
+.modal-backdrop.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
-.status--soft {
-  color: var(--accent);
+/* Mystical smoke particles that appear behind modal */
+.modal-backdrop::before,
+.modal-backdrop::after {
+  content: "";
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 800ms ease-out;
 }
 
-.result {
-  margin-top: 20px;
-  padding: 14px 14px 16px;
+.modal-backdrop::before {
+  background: radial-gradient(circle, rgba(123, 44, 255, 0.4), transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-60%, -50%);
+  animation: smoke-drift-1 3s ease-in-out infinite alternate;
+}
+
+.modal-backdrop::after {
+  background: radial-gradient(circle, rgba(255, 95, 217, 0.3), transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-40%, -50%);
+  animation: smoke-drift-2 3.5s ease-in-out infinite alternate;
+}
+
+.modal-backdrop:not(.hidden)::before,
+.modal-backdrop:not(.hidden)::after {
+  opacity: 0.6;
+}
+
+@keyframes smoke-drift-1 {
+  0% {
+    transform: translate(-60%, -50%) scale(1);
+  }
+  100% {
+    transform: translate(-55%, -48%) scale(1.1);
+  }
+}
+
+@keyframes smoke-drift-2 {
+  0% {
+    transform: translate(-40%, -50%) scale(0.9);
+  }
+  100% {
+    transform: translate(-45%, -52%) scale(1.05);
+  }
+}
+
+/* Modal materializes from the mist with wavy effect */
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: var(--modal-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-soft);
+  padding: 20px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  
+  /* Start visible */
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  filter: blur(0px);
+  
+  /* Smooth mystical entrance */
+  transition: 
+    transform 800ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 800ms cubic-bezier(0.4, 0, 0.2, 1),
+    filter 800ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* When hidden, modal is below, blurred (like in smoke) and scaled down */
+.modal-backdrop.hidden .modal {
+  transform: translateY(40px) scale(0.92);
+  opacity: 0;
+  filter: blur(8px);
+}
+
+/* Wavy shimmer effect on modal edges when visible */
+.modal::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    135deg,
+    rgba(123, 44, 255, 0.3),
+    rgba(255, 95, 217, 0.3),
+    rgba(45, 220, 255, 0.3)
+  );
+  background-size: 200% 200%;
+  opacity: 0;
+  z-index: -1;
+  filter: blur(8px);
+  animation: wavy-glow 4s ease-in-out infinite;
+  transition: opacity 600ms ease-out;
+}
+
+.modal-backdrop:not(.hidden) .modal::before {
+  opacity: 0.5;
+}
+
+@keyframes wavy-glow {
+  0% {
+    background-position: 0% 50%;
+    transform: scale(1);
+  }
+  50% {
+    background-position: 100% 50%;
+    transform: scale(1.02);
+  }
+  100% {
+    background-position: 0% 50%;
+    transform: scale(1);
+  }
+}
+
+.modal-title {
+  margin: 2px 32px 8px 2px;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 9, 40, 0.98);
+  color: var(--text-muted);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px var(--border-subtle);
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.modal-close:active {
+  transform: translateY(1px) scale(0.96);
+}
+
+
+/* Form */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.field-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 88px;
+  max-height: 180px;
+  padding: 10px 11px;
   border-radius: var(--radius-md);
-  background: var(--accent-soft);
-  border: 1px solid rgba(246, 211, 101, 0.35);
-}
-
-.result-title {
-  margin: 0 0 4px;
-  font-size: 0.95rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-}
-
-.fortune-text {
-  margin: 0;
-  font-size: 1rem;
+  border: 1px solid var(--border-subtle);
+  background: rgba(10, 6, 28, 0.96);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 15px;
   line-height: 1.5;
+  outline: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
 }
 
-/* Footer */
-
-.footer {
-  margin-top: 24px;
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--muted);
+textarea::placeholder {
+  color: rgba(182, 169, 217, 0.7);
 }
 
-/* Utility */
+/* Answer */
+.answer {
+  margin-top: 8px;
+  padding: 10px 11px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(100, 77, 190, 0.7);
+  background: radial-gradient(circle at 0% 0%, rgba(123, 44, 255, 0.25), rgba(5, 3, 24, 0.94));
+  color: var(--text-main);
+  font-size: 14px;
+  line-height: 1.5;
+  transition: 
+    opacity 300ms ease-out,
+    max-height 300ms ease-out;
+  opacity: 1;
+  max-height: 500px;
+}
 
-.hidden {
+.answer.hidden {
+  opacity: 0;
+  max-height: 0;
+  padding: 0 11px;
+  margin: 0;
+  overflow: hidden;
+  border-width: 0;
+}
+
+
+/* Processing state – only button labels change */
+.app.processing .default-label {
   display: none;
 }
 
-/* Animations */
-
-@keyframes swirl {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-  50% {
-    transform: translate(-48%, -52%) rotate(8deg) scale(1.05);
-  }
-  100% {
-    transform: translate(-52%, -48%) rotate(-6deg) scale(0.98);
-  }
+.app.processing .processing-label {
+  display: inline-flex;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* Desktop tweaks */
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Larger screens */
-
-@media (min-width: 640px) {
-  .page {
-    padding: 40px 24px 48px;
-  }
-
-  .hero {
-    padding: 48px 40px 52px;
-  }
-
+@media (min-width: 720px) {
   .hero-title {
-    font-size: 3rem;
+    font-size: 40px;
   }
 
-  .card {
-    padding: 28px 26px 32px;
+  .hero-subtitle {
+    font-size: 15px;
   }
 
-  .title {
-    font-size: 1.8rem;
+  .modal {
+    padding: 22px 22px 20px;
+  }
+
+  .modal-title {
+    font-size: 22px;
   }
 }

@@ -1,78 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Fortuna – Ask Fortuna</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="./style.css" />
-  </head>
-  <body>
-    <main class="page">
-      <!-- Hero / crystal ball intro -->
-      <section class="hero" id="hero">
-        <div class="hero-bg">
-          <div class="orb"></div>
-          <div class="orb orb--small"></div>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fortuna</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Galaxy background only -->
+    <div class="galaxy-bg">
+      <div class="galaxy-gradient layer-1"></div>
+      <div class="galaxy-gradient layer-2"></div>
+      <div class="galaxy-gradient layer-3"></div>
+    </div>
 
-        <div class="hero-content">
-          <h1 class="hero-title">Ask Fortuna</h1>
-          <p class="hero-subtitle">
-            Take a breath. Think of one question you’d like clarity on.
-          </p>
-          <button id="begin-btn" class="button hero-button">
-            Begin
-          </button>
-        </div>
-      </section>
-
-      <!-- Main experience card -->
-      <section class="card card--hidden" id="fortune-card" aria-hidden="true">
-        <header class="header">
-          <h2 class="title">Fortuna</h2>
-          <p class="subtitle">
-            One focused question. One fortune to sit with today.
-          </p>
-        </header>
-
-        <div class="card-body">
-          <label for="question" class="label">
-            Your question
-          </label>
-          <p class="helper" id="question-helper">
-            Be specific and ask about one situation only. The clearer you are,
-            the clearer Fortuna can be.
-          </p>
-
-          <textarea
-            id="question"
-            class="input"
-            aria-describedby="question-helper"
-            rows="3"
-            placeholder="What are you wondering about?"
-          ></textarea>
-
-          <button id="ask-btn" class="button">
-            Tell my fortune
-          </button>
-
-          <p id="status" class="status" role="status" aria-live="polite"></p>
-
-          <div id="result" class="result hidden">
-            <h3 class="result-title">Your fortune</h3>
-            <p id="fortune-text" class="fortune-text"></p>
-          </div>
-        </div>
-
-        <footer class="footer">
-          <p>
-            Made as a UX product experiment to explore question framing and
-            single‑answer rituals.
-          </p>
-        </footer>
+    <!-- Foreground -->
+    <main class="content">
+      <section class="hero">
+        <h1 class="hero-title">Ask Fortuna</h1>
+        <p class="hero-subtitle">
+          Ask a question and let the cosmos whisper an answer.
+        </p>
+        <button id="open-modal" class="primary-btn">Ask a question</button>
       </section>
     </main>
 
-    <script src="./main.js"></script>
-  </body>
+    <!-- Modal -->
+    <div id="modal-backdrop" class="modal-backdrop hidden">
+      <div class="modal">
+        <button id="close-modal" class="modal-close" aria-label="Close">×</button>
+        <h2 class="modal-title">What would you like to know?</h2>
+        <form id="question-form">
+          <label class="field">
+            <span class="field-label">Your question</span>
+            <textarea
+              id="question-input"
+              name="question"
+              rows="3"
+              placeholder="Type your question here"
+            ></textarea>
+          </label>
+
+          <button type="submit" class="primary-btn full-width">
+            <span class="btn-label default-label">Ask Fortuna</span>
+            <span class="btn-label processing-label">Listening…</span>
+          </button>
+        </form>
+
+        <div id="answer" class="answer hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./main.js"></script>
+</body>
 </html>
