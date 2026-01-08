@@ -2,41 +2,75 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Fortuna – Fortune Teller</title>
+    <title>Fortuna – Ask Fortuna</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <main class="page">
-      <header class="header">
-        <h1 class="title">Fortuna</h1>
-        <p class="subtitle">
-          Ask one clear question. Get one focused fortune.
-        </p>
-      </header>
+      <!-- Hero / crystal ball intro -->
+      <section class="hero" id="hero">
+        <div class="hero-bg">
+          <div class="orb"></div>
+          <div class="orb orb--small"></div>
+        </div>
 
-      <section class="card">
-        <label for="question" class="label">Your question</label>
-        <textarea
-          id="question"
-          class="input"
-          rows="3"
-          placeholder="What are you wondering about?"
-        ></textarea>
-
-        <button id="ask-btn" class="button">Tell my fortune</button>
-
-        <p id="status" class="status"></p>
-
-        <div id="result" class="result hidden">
-          <h2 class="result-title">Your fortune</h2>
-          <p id="fortune-text" class="fortune-text"></p>
+        <div class="hero-content">
+          <h1 class="hero-title">Ask Fortuna</h1>
+          <p class="hero-subtitle">
+            Take a breath. Think of one question you’d like clarity on.
+          </p>
+          <button id="begin-btn" class="button hero-button">
+            Begin
+          </button>
         </div>
       </section>
 
-      <footer class="footer">
-        <p>Made as a UX product experiment.</p>
-      </footer>
+      <!-- Main experience card -->
+      <section class="card card--hidden" id="fortune-card" aria-hidden="true">
+        <header class="header">
+          <h2 class="title">Fortuna</h2>
+          <p class="subtitle">
+            One focused question. One fortune to sit with today.
+          </p>
+        </header>
+
+        <div class="card-body">
+          <label for="question" class="label">
+            Your question
+          </label>
+          <p class="helper" id="question-helper">
+            Be specific and ask about one situation only. The clearer you are,
+            the clearer Fortuna can be.
+          </p>
+
+          <textarea
+            id="question"
+            class="input"
+            aria-describedby="question-helper"
+            rows="3"
+            placeholder="What are you wondering about?"
+          ></textarea>
+
+          <button id="ask-btn" class="button">
+            Tell my fortune
+          </button>
+
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+
+          <div id="result" class="result hidden">
+            <h3 class="result-title">Your fortune</h3>
+            <p id="fortune-text" class="fortune-text"></p>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <p>
+            Made as a UX product experiment to explore question framing and
+            single‑answer rituals.
+          </p>
+        </footer>
+      </section>
     </main>
 
     <script src="./main.js"></script>

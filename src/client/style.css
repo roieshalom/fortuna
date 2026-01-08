@@ -27,6 +27,8 @@ body {
   background: radial-gradient(circle at top, #18203a 0, #050814 55%, #02030a 100%);
 }
 
+/* Layout */
+
 .page {
   min-height: 100vh;
   max-width: 720px;
@@ -34,26 +36,93 @@ body {
   padding: 32px 16px 40px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  position: relative;
 }
 
-.header {
+/* Hero / crystal ball intro */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  padding: 40px 22px 44px;
+  background: radial-gradient(circle at top, #1b2444 0, #050814 55%, #02030a 100%);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(246, 211, 101, 0.25);
+  isolation: isolate;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.orb {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle at 20% 20%, #fffbe6 0, transparent 45%),
+    radial-gradient(circle at 80% 30%, #fbc2eb 0, transparent 45%),
+    radial-gradient(circle at 30% 80%, #a18cd1 0, transparent 50%);
+  filter: blur(2px);
+  opacity: 0.9;
+  mix-blend-mode: screen;
+  animation: swirl 18s ease-in-out infinite alternate;
+}
+
+.orb--small {
+  width: 220px;
+  height: 220px;
+  opacity: 0.7;
+  background:
+    radial-gradient(circle at 15% 30%, #fff1a8 0, transparent 45%),
+    radial-gradient(circle at 70% 70%, #fda085 0, transparent 50%);
+  animation-duration: 22s;
+}
+
+.hero-content {
+  position: relative;
   text-align: center;
-  margin-bottom: 32px;
+  z-index: 1;
 }
 
-.title {
-  font-size: 2.4rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.hero-title {
   margin: 0 0 8px;
+  font-size: 2.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 0 24px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  animation: fadeInUp 1.4s ease-out forwards;
 }
 
-.subtitle {
-  margin: 0;
+.hero-subtitle {
+  margin: 0 0 22px;
   color: var(--muted);
   font-size: 0.98rem;
+  max-width: 360px;
+  margin-inline: auto;
+  opacity: 0;
+  animation: fadeInUp 1.4s ease-out 0.3s forwards;
 }
+
+.hero-button {
+  max-width: 220px;
+  margin-inline: auto;
+  opacity: 0;
+  animation: fadeInUp 1.2s ease-out 0.6s forwards;
+}
+
+/* Main card */
 
 .card {
   background: linear-gradient(
@@ -66,12 +135,58 @@ body {
   padding: 24px 20px 28px;
   box-shadow: var(--shadow-soft);
   border: 1px solid rgba(246, 211, 101, 0.25);
+  margin-top: 12px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.45s ease, transform 0.45s ease;
 }
+
+.card--hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.card--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 1.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.card-body {
+  margin-top: 8px;
+}
+
+/* Form elements */
 
 .label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.helper {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
   color: var(--muted);
 }
 
@@ -89,10 +204,16 @@ body {
   outline: none;
 }
 
+.input::placeholder {
+  color: rgba(157, 163, 194, 0.85);
+}
+
 .input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px rgba(246, 211, 101, 0.55);
 }
+
+/* Buttons */
 
 .button {
   margin-top: 14px;
@@ -103,11 +224,11 @@ body {
   background: radial-gradient(circle at top left, #fff1a8, #f6d365, #fda085);
   color: #201313;
   font-weight: 600;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
 }
 
@@ -128,6 +249,8 @@ body {
   box-shadow: none;
 }
 
+/* Feedback + result */
+
 .status {
   min-height: 18px;
   margin: 10px 0 0;
@@ -137,6 +260,10 @@ body {
 
 .status--error {
   color: var(--error);
+}
+
+.status--soft {
+  color: var(--accent);
 }
 
 .result {
@@ -161,23 +288,77 @@ body {
   line-height: 1.5;
 }
 
-.hidden {
-  display: none;
-}
+/* Footer */
 
 .footer {
-  margin-top: 32px;
+  margin-top: 24px;
   text-align: center;
   font-size: 0.8rem;
   color: var(--muted);
 }
 
+/* Utility */
+
+.hidden {
+  display: none;
+}
+
+/* Animations */
+
+@keyframes swirl {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate(-48%, -52%) rotate(8deg) scale(1.05);
+  }
+  100% {
+    transform: translate(-52%, -48%) rotate(-6deg) scale(0.98);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Larger screens */
+
 @media (min-width: 640px) {
+  .page {
+    padding: 40px 24px 48px;
+  }
+
+  .hero {
+    padding: 48px 40px 52px;
+  }
+
+  .hero-title {
+    font-size: 3rem;
+  }
+
   .card {
     padding: 28px 26px 32px;
   }
 
   .title {
-    font-size: 2.8rem;
+    font-size: 1.8rem;
   }
 }
