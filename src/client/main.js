@@ -1,3 +1,15 @@
+// Hide loading screen when app is ready
+window.addEventListener('load', () => {
+  // Small delay to ensure smooth transition
+  setTimeout(() => {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      loadingScreen.classList.add('hidden');
+    }
+  }, 5000);
+});
+
+// Main app logic
 const appEl = document.querySelector(".app");
 const openModalBtn = document.getElementById("open-modal");
 const modalBackdrop = document.getElementById("modal-backdrop");
@@ -44,7 +56,7 @@ formEl.addEventListener("submit", async (e) => {
     // Replace with your real backend call
     await new Promise((resolve) => setTimeout(resolve, 2500));
     const mockAnswer =
-      "Here you’ll see the answer from the model once the backend is connected.";
+      "Here you'll see the answer from the model once the backend is connected.";
     answerEl.textContent = mockAnswer;
   } catch (err) {
     console.error(err);
