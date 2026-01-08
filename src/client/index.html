@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fortuna – Fortune Teller</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="header">
+        <h1 class="title">Fortuna</h1>
+        <p class="subtitle">
+          Ask one clear question. Get one focused fortune.
+        </p>
+      </header>
+
+      <section class="card">
+        <label for="question" class="label">Your question</label>
+        <textarea
+          id="question"
+          class="input"
+          rows="3"
+          placeholder="What are you wondering about?"
+        ></textarea>
+
+        <button id="ask-btn" class="button">Tell my fortune</button>
+
+        <p id="status" class="status"></p>
+
+        <div id="result" class="result hidden">
+          <h2 class="result-title">Your fortune</h2>
+          <p id="fortune-text" class="fortune-text"></p>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>Made as a UX product experiment.</p>
+      </footer>
+    </main>
+
+    <script src="./main.js"></script>
+  </body>
+</html>
