@@ -1,67 +1,27 @@
-// Hide loading screen when app is ready
-window.addEventListener('load', () => {
-  // Small delay to ensure smooth transition
-  setTimeout(() => {
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) {
-      loadingScreen.classList.add('hidden');
-    }
-  }, 5000);
-});
+const form = document.getElementById("fortune-form");
+const questionInput = document.getElementById("question");
+const output = document.getElementById("fortune-output");
 
-// Main app logic
-const appEl = document.querySelector(".app");
-const openModalBtn = document.getElementById("open-modal");
-const modalBackdrop = document.getElementById("modal-backdrop");
-const closeModalBtn = document.getElementById("close-modal");
-const formEl = document.getElementById("question-form");
-const questionInput = document.getElementById("question-input");
-const answerEl = document.getElementById("answer");
-
-function openModal() {
-  modalBackdrop.classList.remove("hidden");
-  setTimeout(() => questionInput.focus(), 50);
-}
-
-function closeModal() {
-  modalBackdrop.classList.add("hidden");
-  stopProcessing();
-}
-
-function startProcessing() {
-  appEl.classList.add("processing");
-}
-
-function stopProcessing() {
-  appEl.classList.remove("processing");
-}
-
-openModalBtn.addEventListener("click", openModal);
-closeModalBtn.addEventListener("click", closeModal);
-
-modalBackdrop.addEventListener("click", (e) => {
-  if (e.target === modalBackdrop) closeModal();
-});
-
-formEl.addEventListener("submit", async (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const question = questionInput.value.trim();
-  if (!question) return;
 
-  startProcessing();
-  answerEl.classList.remove("hidden");
-  answerEl.textContent = "Consulting Fortuna…";
+  output.textContent = "Consulting the stars…";
 
   try {
-    // Replace with your real backend call
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-    const mockAnswer =
-      "Here you'll see the answer from the model once the backend is connected.";
-    answerEl.textContent = mockAnswer;
+    const res = await fetch("/api/fortune", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: questionInput.value })
+    });
+
+    if (!res.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data = await res.json();
+    output.textContent = data.fortune;
   } catch (err) {
+    output.textContent = "The nebula is silent. Try again.";
     console.error(err);
-    answerEl.textContent = "Something went wrong while reaching Fortuna.";
-  } finally {
-    stopProcessing();
   }
 });

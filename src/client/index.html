@@ -1,75 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fortuna</title>
-  <link rel="stylesheet" href="./style.css" />
-</head>
-<body>
-  <!-- Mystical loading screen -->
-  <div class="loading-screen" id="loading-screen">
-    <div class="loading-bg">
-      <div class="loading-orb"></div>
-      <div class="loading-stars"></div>
-    </div>
-    <div class="loading-content">
-      <h1 class="loading-title">Fortuna</h1>
-      <p class="loading-subtitle">The cosmos is aligning...</p>
-      <div class="loading-spinner">
-        <div class="spinner-ring"></div>
-        <div class="spinner-ring"></div>
-        <div class="spinner-ring"></div>
-      </div>
-    </div>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>FORTUNA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="panel">
+        <h1>FORTUNA</h1>
+        <p class="tagline">Ask a question, consult the nebula.</p>
 
-  <div class="app">
-    <!-- Galaxy background only -->
-    <div class="galaxy-bg">
-      <div class="galaxy-gradient layer-1"></div>
-      <div class="galaxy-gradient layer-2"></div>
-      <div class="galaxy-gradient layer-3"></div>
-    </div>
+        <form id="fortune-form">
+          <label for="question">Your question</label>
+          <input
+            id="question"
+            name="question"
+            type="text"
+            placeholder="What is on your mind?"
+            required
+          />
+          <button type="submit">Reveal fortune</button>
+        </form>
 
-    <!-- Foreground -->
-    <main class="content">
-      <section class="hero">
-        <h1 class="hero-title">Ask Fortuna</h1>
-        <p class="hero-subtitle">
-          Ask a question and let the cosmos whisper an answer.
-        </p>
-        <button id="open-modal" class="primary-btn">Ask a question</button>
+        <div id="fortune-output" class="fortune-output">
+          <span class="placeholder">Your fortune will appear here.</span>
+        </div>
+
+        <a href="/nebula-background.html" class="link">
+          View nebula background demo
+        </a>
       </section>
     </main>
 
-    <!-- Modal -->
-    <div id="modal-backdrop" class="modal-backdrop hidden">
-      <div class="modal">
-        <button id="close-modal" class="modal-close" aria-label="Close">×</button>
-        <h2 class="modal-title">What would you like to know?</h2>
-        <form id="question-form">
-          <label class="field">
-            <span class="field-label">Your question</span>
-            <textarea
-              id="question-input"
-              name="question"
-              rows="3"
-              placeholder="Type your question here"
-            ></textarea>
-          </label>
-
-          <button type="submit" class="primary-btn full-width">
-            <span class="btn-label default-label">Ask Fortuna</span>
-            <span class="btn-label processing-label">Listening…</span>
-          </button>
-        </form>
-
-        <div id="answer" class="answer hidden"></div>
-      </div>
-    </div>
-  </div>
-
-  <script src="./main.js"></script>
-</body>
+    <script type="module" src="./main.js"></script>
+  </body>
 </html>

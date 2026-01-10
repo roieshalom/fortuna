@@ -1,50 +1,46 @@
-// src/server/index.js
-const express = require("express");
-const path = require("path");
-const cors = require("cors");
-require("dotenv").config();
+import express from "express";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Serve static frontend from src/client
+// Static client
 const clientPath = path.join(__dirname, "..", "client");
 app.use(express.static(clientPath));
 
-// API route: generate a fortune
-app.post("/api/fortune", async (req, res) => {
-  const { question } = req.body || {};
+// Static assets for Three.js texture
+const assetsPath = path.join(__dirname, "assets");
+app.use("/server/assets", express.static(assetsPath));
 
-  if (!question || question.trim().length === 0) {
-    return res.status(400).json({ error: "Please ask a question." });
-  }
+// Simple fortune API
+const fortunes = [
+  "The nebula whispers: change brings clarity.",
+  "Your question echoes in the cosmos; patience will reveal the answer.",
+  "A new path forms where doubt once lived.",
+  "Trust the quiet signal beneath the noise."
+];
 
-  // TODO: replace this block with real API call using process.env.FORTUNE_API_KEY
-  const fakeFortunes = [
-    "The winds of change are already in your favor.",
-    "An unexpected message will bring clarity soon.",
-    "Your patience will pay off sooner than you think.",
-    "Saying no will open the door you actually want.",
-    "You already know the answer, you just needed to ask."
-  ];
-  const fortune =
-    fakeFortunes[Math.floor(Math.random() * fakeFortunes.length)];
-
-  return res.json({
-    question,
-    fortune
-  });
+app.post("/api/fortune", (req, res) => {
+  const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+  res.json({ fortune });
 });
 
-// Fallback: send index.html for any other route (simple SPA feel)
+// SPA fallback
 app.get("*", (req, res) => {
   res.sendFile(path.join(clientPath, "index.html"));
 });
 
 app.listen(PORT, () => {
-  console.log(`Fortuna server running at http://localhost:${PORT}`);
+  console.log(`FORTUNA listening on port ${PORT}`);
 });
