@@ -4,10 +4,214 @@
     <meta charset="UTF-8" />
     <title>FORTUNA</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rye&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="./style.css" />
+
+    <style>
+      /* === GLOBAL / BACKGROUND === */
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #020617;
+      }
+
+      canvas {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+      }
+
+      /* === SPLASH OVERLAY === */
+      .splash-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        pointer-events: none;
+        background: transparent;
+      }
+
+      .splash-wrapper {
+        position: relative;
+      }
+
+      .splash-smoke {
+        display: none;
+      }
+
+      /* MAGIC WHEEL */
+        .splash-wheel {
+          position: absolute;
+          inset: 50% auto auto 50%;
+          transform: translate(-50%, -50%) scale(0.4);
+          width: min(50vmin, 360px);
+          height: auto;
+          opacity: 0;
+          z-index: -1;
+          filter: drop-shadow(0 0 16px rgba(243, 213, 107, 0.7));
+          /* earlier start: 0.5 + 0.5*3 = 2.0s */
+          animation:
+            wheel-appear 1s ease-out forwards 2s,
+            wheel-rotate 40s linear infinite 2s;
+        }
+
+        @keyframes wheel-appear {
+          0% {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.2);
+          }
+          100% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(0.5);
+          }
+        }
+
+        @keyframes wheel-rotate {
+          0% {
+            transform: translate(-50%, -50%) scale(1) rotate(0deg);
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(1) rotate(360deg);
+          }
+        }
+
+
+      .splash-title {
+        position: relative;
+        font-family: 'Rye', system-ui, sans-serif;
+        font-size: clamp(3rem, 8vw, 5rem);
+        letter-spacing: 0.05em; /* closer letters */
+        text-transform: uppercase;
+        color: #f3d56b;
+        text-shadow:
+          0 0 8px rgba(247, 225, 137, 0.8),
+          0 0 26px rgba(122, 246, 255, 0.45),
+          0 0 40px rgba(123, 63, 196, 0.7);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(20px) scale(0.85);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.05em;
+        /* runs for 3s, but starts after 0.5s so first 0.5s is only bg */
+        animation: title-intro 3s ease-out forwards;
+        animation-delay: 0.5s;
+      }
+
+      .splash-line {
+        display: flex;
+        justify-content: center;
+      }
+
+      .splash-line span {
+        display: inline-block;
+      }
+
+      /* Intro: slow ease-in, no wobble */
+      @keyframes title-intro {
+        0% {
+          opacity: 0;
+          transform: translateY(40px) scale(0.7);
+        }
+        70% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      /* After app shows: move title to top */
+      .splash-title.to-top {
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%) translateY(0) scale(0.7);
+        font-size: clamp(1.6rem, 4vw, 2.4rem);
+        letter-spacing: 0.05em;
+        z-index: 3;
+        animation: title-stick-top 0.9s ease-in-out forwards;
+        pointer-events: none;
+      }
+
+      @keyframes title-stick-top {
+        0% {
+          top: 50%;
+          transform: translate(-50%, -50%) scale(1);
+        }
+        100% {
+          top: 16px;
+          transform: translateX(-50%) translateY(0) scale(0.7);
+        }
+      }
+
+      /* hide app until splash finished */
+      .app {
+        position: relative;
+        z-index: 1;
+        opacity: 0;
+        transition: opacity 0.8s ease;
+      }
+      .app.visible {
+        opacity: 1;
+      }
+
+      @media (max-width: 768px) {
+        .splash-title {
+          font-size: clamp(2.4rem, 10vw, 3.2rem);
+        }
+        .splash-title.to-top {
+          font-size: clamp(1.4rem, 6vw, 2rem);
+        }
+        .splash-wheel {
+          width: min(50vmin, 320px);                  /* much smaller on narrow screens */
+          transform: translate(-50%, -50%) scale(0.8);
+        }
+      }
+    </style>
   </head>
   <body>
-    <main class="app">
+    <!-- Nebula background canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Splash overlay -->
+    <div class="splash-overlay" id="splash">
+      <div class="splash-wrapper">
+        <!-- Rotating wheel behind title -->
+        <img
+          src="/server/assets/wheel.png"
+          alt="Fortuna wheel"
+          class="splash-wheel"
+        />
+
+        <!-- 2-line intro text (appears together) -->
+        <div class="splash-title" id="splash-title" aria-label="Ask Fortuna">
+          <div class="splash-line">
+            <span>A</span><span>S</span><span>K</span>
+          </div>
+          <div class="splash-line">
+            <span>F</span><span>O</span><span>R</span><span>T</span>
+            <span>U</span><span>N</span><span>A</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main app content -->
+    <main class="app" id="app-root">
       <section class="panel">
         <h1>FORTUNA</h1>
         <p class="tagline">Ask a question, consult the nebula.</p>
@@ -34,6 +238,135 @@
       </section>
     </main>
 
+    <!-- Nebula background script -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.158.0/build/three.module.js"
+        }
+      }
+    </script>
+
+    <script type="module">
+      import * as THREE from "three";
+
+      const canvas = document.getElementById("bg-canvas");
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      renderer.setClearColor(0x050816, 1);
+
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x050816, 0.02);
+
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        100
+      );
+      camera.position.set(0, 0, 5);
+      camera.lookAt(0, 0, 0);
+
+      const purpleLight = new THREE.PointLight(0xd946ff, 2.4, 80);
+      purpleLight.position.set(-2.5, 2, 8);
+
+      const cyanLight = new THREE.PointLight(0x5ee7ff, 2.0, 80);
+      cyanLight.position.set(3, -1.5, 7);
+
+      const pinkLight = new THREE.PointLight(0xff6ad5, 1.8, 70);
+      pinkLight.position.set(0, -3, 6);
+
+      scene.add(purpleLight, cyanLight, pinkLight);
+      scene.add(new THREE.AmbientLight(0x1f2937, 1.1));
+
+      const loader = new THREE.TextureLoader();
+      const smokeTexture = loader.load("/server/assets/smoke.png");
+
+      const cloudGeo = new THREE.PlaneGeometry(4, 4);
+      const clouds = [];
+
+      for (let i = 0; i < 50; i++) {
+        const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
+        const tint = tintColors[i % tintColors.length];
+
+        const material = new THREE.MeshLambertMaterial({
+          map: smokeTexture,
+          color: tint,
+          transparent: true,
+          opacity: 0.95,
+          depthWrite: false,
+          side: THREE.DoubleSide
+        });
+
+        const cloud = new THREE.Mesh(cloudGeo, material);
+
+        if (i < 20) {
+          const angle = (i / 20) * Math.PI * 2;
+          const radius = 4.3;
+          cloud.position.set(
+            Math.cos(angle) * radius,
+            Math.sin(angle) * radius,
+            -0.5
+          );
+        } else {
+          cloud.position.set(
+            (Math.random() - 0.5) * 4,
+            (Math.random() - 0.5) * 4,
+            -1 - Math.random() * 1.5
+          );
+        }
+
+        cloud.rotation.z = Math.random() * Math.PI * 2;
+        scene.add(cloud);
+        clouds.push(cloud);
+      }
+
+      function onResize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener("resize", onResize);
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        clouds.forEach((cloud, i) => {
+          const dir = i % 2 === 0 ? 1 : -1;
+          cloud.rotation.z += 0.0022 * dir;
+        });
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // === SPLASH → APP TRANSITION ===
+      const splash = document.getElementById("splash");
+      const appRoot = document.getElementById("app-root");
+      const splashTitle = document.getElementById("splash-title");
+
+      // text anim: 0.5s delay + 3s = 3.5s; wheel fade: 2.9–4.4s; +1s hold → ~5.4s
+      setTimeout(() => {
+        appRoot.classList.add("visible");
+
+        if (splashTitle) {
+          splashTitle.classList.add("to-top");
+        }
+
+        splash.style.transition = "opacity 0.8s ease";
+        splash.style.opacity = "0";
+
+        setTimeout(() => {
+          splash.style.display = "none";
+        }, 900);
+      }, 5400);
+    </script>
+
+    <!-- Your existing app JS -->
     <script type="module" src="./main.js"></script>
   </body>
 </html>
