@@ -5,6 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import OpenAI from "openai";
+import fs from "fs";
 
 dotenv.config();
 
@@ -56,6 +57,34 @@ app.post("/api/fortune", async (req, res) => {
     });
 
     const fortune = completion.choices[0].message.content.trim();
+    
+    // Log the question and fortune to JSON array
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      question,
+      fortune
+    };
+    
+    try {
+      const logPath = path.join(__dirname, "fortune-log.json");
+      let logs = [];
+      
+      // Read existing logs if file exists
+      if (fs.existsSync(logPath)) {
+        const fileContent = fs.readFileSync(logPath, "utf8");
+        logs = JSON.parse(fileContent);
+      }
+      
+      // Add new entry
+      logs.push(logEntry);
+      
+      // Write back with pretty formatting
+      fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
+    } catch (logError) {
+      console.error("Failed to log fortune:", logError);
+      // Don't fail the request if logging fails
+    }
+
     res.json({ fortune });
   } catch (error) {
     console.error("OpenAI error:", error);
