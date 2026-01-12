@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 import fs from "fs";
+import Airtable from "airtable";
 
 dotenv.config();
 
@@ -30,6 +31,10 @@ app.use("/server/assets", express.static(assetsPath));
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
+
+// Airtable setup
+const airtableBase = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
+  .base(process.env.AIRTABLE_BASE_ID);
 
 // AI Fortune API
 app.post("/api/fortune", async (req, res) => {
@@ -58,7 +63,26 @@ app.post("/api/fortune", async (req, res) => {
 
     const fortune = completion.choices[0].message.content.trim();
     
-    // Log the question and fortune to JSON array
+// Log to Airtable
+console.log("Attempting to log to Airtable...");
+try {
+  await airtableBase('Questions').create([
+    {
+      fields: {
+        Timestamp: new Date().toISOString(),
+        Question: question,
+        Fortune: fortune
+      }
+    }
+  ]);
+  console.log("✅ Logged to Airtable successfully");
+} catch (airtableError) {
+  console.error("❌ Failed to log to Airtable:", airtableError);
+  // Don't fail the request if logging fails
+}
+
+
+    // Also keep local JSON logging for development
     const logEntry = {
       timestamp: new Date().toISOString(),
       question,
@@ -69,20 +93,15 @@ app.post("/api/fortune", async (req, res) => {
       const logPath = path.join(__dirname, "fortune-log.json");
       let logs = [];
       
-      // Read existing logs if file exists
       if (fs.existsSync(logPath)) {
         const fileContent = fs.readFileSync(logPath, "utf8");
         logs = JSON.parse(fileContent);
       }
       
-      // Add new entry
       logs.push(logEntry);
-      
-      // Write back with pretty formatting
       fs.writeFileSync(logPath, JSON.stringify(logs, null, 2));
     } catch (logError) {
-      console.error("Failed to log fortune:", logError);
-      // Don't fail the request if logging fails
+      console.error("Failed to log locally:", logError);
     }
 
     res.json({ fortune });
