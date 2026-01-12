@@ -231,55 +231,50 @@
           splashTitle.offsetHeight;
         }
         
-        // Handle wheel with same timing and requirements
+        // Move wheel to body so it can fade independently (stays in same position)
         if (splashWheel) {
           const wheelRect = splashWheel.getBoundingClientRect();
           const wheelComputedStyle = window.getComputedStyle(splashWheel);
           
-          // Capture the center point of the wheel
+          // Capture current position and transform
           const wheelCenterX = wheelRect.left + wheelRect.width / 2;
           const wheelCenterY = wheelRect.top + wheelRect.height / 2;
-          
-          // Calculate target scale: final width should be 25% of viewport width (same as title)
-          const wheelCurrentWidth = wheelRect.width;
-          const wheelTargetWidth = window.innerWidth * 0.25;
-          const wheelTargetScale = wheelTargetWidth / wheelCurrentWidth;
-          
-          console.log("Moving wheel - center:", wheelCenterX, wheelCenterY, "scale:", wheelTargetScale);
+          const currentTransform = wheelComputedStyle.transform;
           
           // Move to body to make it independent of splash overlay
           document.body.appendChild(splashWheel);
           
-          // Preserve current visual position - center it at its current location
+          // Preserve current visual position - keep it exactly where it is
           splashWheel.style.position = "fixed";
           splashWheel.style.top = wheelCenterY + "px";
           splashWheel.style.left = wheelCenterX + "px";
-          splashWheel.style.transform = "translate(-50%, -50%) scale(1) rotate(0deg)";
+          // Set base transform to center the wheel (animation will add rotation)
+          splashWheel.style.transform = "translate(-50%, -50%)";
           splashWheel.style.width = wheelComputedStyle.width;
           splashWheel.style.height = wheelComputedStyle.height;
           splashWheel.style.filter = wheelComputedStyle.filter;
-          splashWheel.style.zIndex = "9"; // Behind title but above app
-          splashWheel.style.opacity = "1";
+          splashWheel.style.zIndex = "9";
           splashWheel.style.pointerEvents = "none";
+          splashWheel.style.opacity = "1";
           
-          // Store initial position and target scale for animation
-          splashWheel.style.setProperty("--start-top", wheelCenterY + "px");
-          splashWheel.style.setProperty("--start-left", wheelCenterX + "px");
-          splashWheel.style.setProperty("--target-scale", wheelTargetScale);
-          
-          // Force reflow to ensure position is set
+          // Force reflow
           splashWheel.offsetHeight;
         }
         
-        // Trigger animations for both at the same time
+        // Trigger title animation and wheel fade-out
         setTimeout(() => {
           if (splashTitle) {
             console.log("Adding to-top class to title");
             splashTitle.classList.add("to-top");
           }
+          // Fade out wheel at the same time (wheel stays in place)
           if (splashWheel) {
-            console.log("Adding to-top class to wheel");
-            splashWheel.classList.add("to-top");
+            console.log("Fading out wheel, current opacity:", window.getComputedStyle(splashWheel).opacity);
+            splashWheel.classList.add("fade-out");
+            // Force reflow to trigger animation
+            splashWheel.offsetHeight;
+            console.log("After adding fade-out, opacity:", window.getComputedStyle(splashWheel).opacity);
+            console.log("Animation:", window.getComputedStyle(splashWheel).animation);
           }
         }, 100);
 

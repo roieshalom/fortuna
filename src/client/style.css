@@ -147,43 +147,40 @@ canvas {
     transform: translate(-50%, -50%) scale(1);
   }
   100% {
-    top: -10px;
+    top: 16px;
     left: 50%;
     transform: translate(-50%, 0) scale(var(--target-scale, 0.25));
   }
 }
 
-.splash-wheel.to-top {
-  animation: wheel-slide-and-rotate 0.9s ease-in-out forwards,
-             wheel-rotate-header 20s linear infinite 0.9s;
+/* Wheel fades out when text moves up - wheel stays in place */
+.splash-wheel.fade-out {
+  animation: wheel-rotate-and-fade 40s linear infinite,
+             wheel-fade-out 0.9s ease-in-out forwards;
 }
 
-@keyframes wheel-slide-and-rotate {
-  0% {
-    top: var(--start-top, 50%);
-    left: var(--start-left, 50%);
-    transform: translate(-50%, -50%) scale(1) rotate(0deg);
-  }
-  100% {
-    top: -65px;
-    left: 50%;
-    transform: translate(-50%, 0) scale(var(--target-scale, 0.25)) rotate(16.2deg);
-  }
-}
-
-@keyframes wheel-rotate-header {
+@keyframes wheel-rotate-and-fade {
   from {
-    transform: translate(-50%, 0) scale(var(--target-scale, 0.25)) rotate(16.2deg);
+    transform: translate(-50%, -50%) rotate(0deg);
   }
   to {
-    transform: translate(-50%, 0) scale(var(--target-scale, 0.25)) rotate(376.2deg);
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes wheel-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
 /* Hide app until splash finished */
 .app {
   position: relative;
-  z-index: 1;
+  z-index: 20;
   opacity: 0;
   transition: opacity 0.8s ease;
   width: 100%;
