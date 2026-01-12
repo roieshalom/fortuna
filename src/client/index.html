@@ -174,7 +174,7 @@
 
       // Title intro: 0.5s delay + 3s duration = 3.5s finish
       // Wait 1000ms after splash finishes = 4.5s total
-      const splashFinishTime = 3500; // 0.5s delay + 3s animation
+      const splashFinishTime = 1300; // 0.5s delay + 3s animation
       const transitionDelay = 1000; // 1000ms after splash finishes
       const totalDelay = splashFinishTime + transitionDelay; // 4.5s
 
@@ -271,8 +271,10 @@
           }
         }, 100);
 
-        // Show the app (input box appears)
-        appRoot.classList.add("visible");
+        // Show the app (input box appears) a bit later
+        setTimeout(() => {
+          appRoot.classList.add("visible");
+        }, 600); // <- adjust this delay (ms) to taste
 
         // Fade out the splash overlay background (title and wheel are now independent)
         splash.style.transition = "opacity 0.8s ease";
@@ -282,7 +284,7 @@
         setTimeout(() => {
           splash.style.display = "none";
         }, 900);
-      }, totalDelay);
+        }, totalDelay);
     </script>
 
     <!-- Your existing app JS -->
