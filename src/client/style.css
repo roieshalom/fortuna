@@ -54,41 +54,6 @@ canvas {
   display: none;
 }
 
-/* === MAGIC WHEEL === */
-.splash-wheel {
-  position: absolute;
-  inset: 50% auto auto 50%;
-  transform: translate(-50%, -50%) scale(0.4);
-  width: min(50vmin, 360px);
-  height: auto;
-  opacity: 0;
-  z-index: -1;
-  filter: drop-shadow(0 0 16px rgba(243, 213, 107, 0.7));
-  animation:
-    wheel-appear 1s ease-out forwards 2s,
-    wheel-rotate 40s linear infinite 2s;
-}
-
-@keyframes wheel-appear {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.2);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0.5);
-  }
-}
-
-@keyframes wheel-rotate {
-  0% {
-    transform: translate(-50%, -50%) scale(1) rotate(0deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1) rotate(360deg);
-  }
-}
-
 .splash-title {
   position: relative;
   font-family: 'Rye', system-ui, sans-serif;
@@ -153,30 +118,6 @@ canvas {
   }
 }
 
-/* Wheel fades out when text moves up - wheel stays in place */
-.splash-wheel.fade-out {
-  animation: wheel-rotate-and-fade 40s linear infinite,
-             wheel-fade-out 0.9s ease-in-out forwards;
-}
-
-@keyframes wheel-rotate-and-fade {
-  from {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-
-@keyframes wheel-fade-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
 /* Hide app until splash finished */
 .app {
   position: relative;
@@ -198,13 +139,6 @@ canvas {
   }
   .splash-title.to-top {
     font-size: clamp(1.4rem, 6vw, 2rem);
-  }
-  .splash-wheel {
-    width: min(50vmin, 320px);
-    transform: translate(-50%, -50%) scale(0.8);
-  }
-  .splash-wheel.to-top {
-    width: min(12vmin, 100px);
   }
 }
 

@@ -19,13 +19,6 @@
     <!-- Splash overlay -->
     <div class="splash-overlay" id="splash">
       <div class="splash-wrapper">
-        <!-- Rotating wheel behind title -->
-        <img
-          src="/server/assets/wheel.png"
-          alt="Fortuna wheel"
-          class="splash-wheel"
-        />
-
         <!-- 2-line intro text (appears together) -->
         <div class="splash-title" id="splash-title" aria-label="Ask Fortuna">
           <div class="splash-line">
@@ -177,7 +170,6 @@
       const splash = document.getElementById("splash");
       const appRoot = document.getElementById("app-root");
       const splashTitle = document.getElementById("splash-title");
-      const splashWheel = document.querySelector(".splash-wheel");
 
       // Title intro: 0.5s delay + 3s duration = 3.5s finish
       // Wait 1000ms after splash finishes = 4.5s total
@@ -186,7 +178,7 @@
       const totalDelay = splashFinishTime + transitionDelay; // 4.5s
 
       setTimeout(() => {
-        // Move title and wheel to body to keep them visible during transition
+        // Move title to body to keep it visible during transition
         if (splashTitle) {
           const rect = splashTitle.getBoundingClientRect();
           const computedStyle = window.getComputedStyle(splashTitle);
@@ -231,57 +223,18 @@
           splashTitle.offsetHeight;
         }
         
-        // Move wheel to body so it can fade independently (stays in same position)
-        if (splashWheel) {
-          const wheelRect = splashWheel.getBoundingClientRect();
-          const wheelComputedStyle = window.getComputedStyle(splashWheel);
-          
-          // Capture current position and transform
-          const wheelCenterX = wheelRect.left + wheelRect.width / 2;
-          const wheelCenterY = wheelRect.top + wheelRect.height / 2;
-          const currentTransform = wheelComputedStyle.transform;
-          
-          // Move to body to make it independent of splash overlay
-          document.body.appendChild(splashWheel);
-          
-          // Preserve current visual position - keep it exactly where it is
-          splashWheel.style.position = "fixed";
-          splashWheel.style.top = wheelCenterY + "px";
-          splashWheel.style.left = wheelCenterX + "px";
-          // Set base transform to center the wheel (animation will add rotation)
-          splashWheel.style.transform = "translate(-50%, -50%)";
-          splashWheel.style.width = wheelComputedStyle.width;
-          splashWheel.style.height = wheelComputedStyle.height;
-          splashWheel.style.filter = wheelComputedStyle.filter;
-          splashWheel.style.zIndex = "9";
-          splashWheel.style.pointerEvents = "none";
-          splashWheel.style.opacity = "1";
-          
-          // Force reflow
-          splashWheel.offsetHeight;
-        }
-        
-        // Trigger title animation and wheel fade-out
+        // Trigger title animation
         setTimeout(() => {
           if (splashTitle) {
             console.log("Adding to-top class to title");
             splashTitle.classList.add("to-top");
-          }
-          // Fade out wheel at the same time (wheel stays in place)
-          if (splashWheel) {
-            console.log("Fading out wheel, current opacity:", window.getComputedStyle(splashWheel).opacity);
-            splashWheel.classList.add("fade-out");
-            // Force reflow to trigger animation
-            splashWheel.offsetHeight;
-            console.log("After adding fade-out, opacity:", window.getComputedStyle(splashWheel).opacity);
-            console.log("Animation:", window.getComputedStyle(splashWheel).animation);
           }
         }, 100);
 
         // Show the app (input box appears)
         appRoot.classList.add("visible");
 
-        // Fade out the splash overlay background (title and wheel are now independent)
+        // Fade out the splash overlay background (title is now independent)
         splash.style.transition = "opacity 0.8s ease";
         splash.style.opacity = "0";
 
