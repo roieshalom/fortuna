@@ -12,22 +12,203 @@
   box-sizing: border-box;
 }
 
+/* === GLOBAL / BACKGROUND === */
+html,
 body {
   margin: 0;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
+  background: #020617;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     sans-serif;
-  background: radial-gradient(circle at top, #1d4ed8 0, var(--bg) 55%);
   color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+canvas {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* === SPLASH OVERLAY === */
+.splash-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+  background: transparent;
+}
+
+.splash-wrapper {
+  position: relative;
+}
+
+.splash-smoke {
+  display: none;
+}
+
+/* === MAGIC WHEEL === */
+.splash-wheel {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%) scale(0.4);
+  width: min(50vmin, 360px);
+  height: auto;
+  opacity: 0;
+  z-index: -1;
+  filter: drop-shadow(0 0 16px rgba(243, 213, 107, 0.7));
+  animation:
+    wheel-appear 1s ease-out forwards 2s,
+    wheel-rotate 40s linear infinite 2s;
+}
+
+@keyframes wheel-appear {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+}
+
+@keyframes wheel-rotate {
+  0% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1) rotate(360deg);
+  }
+}
+
+.splash-title {
+  position: relative;
+  font-family: 'Rye', system-ui, sans-serif;
+  font-size: clamp(3rem, 8vw, 5rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #f3d56b;
+  text-shadow:
+    0 0 8px rgba(247, 225, 137, 0.8),
+    0 0 26px rgba(122, 246, 255, 0.45),
+    0 0 40px rgba(123, 63, 196, 0.7);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(20px) scale(0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05em;
+  animation: title-intro 3s ease-out forwards;
+  animation-delay: 0.5s;
+}
+
+.splash-line {
+  display: flex;
+  justify-content: center;
+}
+
+.splash-line span {
+  display: inline-block;
+}
+
+@keyframes title-intro {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.7);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* After app shows: move title to top header - just slide up, no resize */
+.splash-title.to-top {
+  animation: title-slide-up 0.9s ease-in-out forwards;
+}
+
+@keyframes title-slide-up {
+  0% {
+    top: var(--start-top, 50%);
+    left: var(--start-left, 50%);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    top: -10px;
+    left: 50%;
+    transform: translate(-50%, 0) scale(var(--target-scale, 0.25));
+  }
+}
+
+.splash-wheel.to-top {
+  animation: wheel-slide-and-rotate 0.9s ease-in-out forwards,
+             wheel-rotate-header 20s linear infinite 0.9s;
+}
+
+@keyframes wheel-slide-and-rotate {
+  0% {
+    top: var(--start-top, 50%);
+    left: var(--start-left, 50%);
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  100% {
+    top: -65px;
+    left: 50%;
+    transform: translate(-50%, 0) scale(var(--target-scale, 0.25)) rotate(16.2deg);
+  }
+}
+
+@keyframes wheel-rotate-header {
+  from {
+    transform: translate(-50%, 0) scale(var(--target-scale, 0.25)) rotate(16.2deg);
+  }
+  to {
+    transform: translate(-50%, 0) scale(var(--target-scale, 0.25)) rotate(376.2deg);
+  }
+}
+
+/* Hide app until splash finished */
 .app {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.8s ease;
   width: 100%;
   max-width: 480px;
   padding: 24px;
+}
+
+.app.visible {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .splash-title {
+    font-size: clamp(2.4rem, 10vw, 3.2rem);
+  }
+  .splash-title.to-top {
+    font-size: clamp(1.4rem, 6vw, 2rem);
+  }
+  .splash-wheel {
+    width: min(50vmin, 320px);
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  .splash-wheel.to-top {
+    width: min(12vmin, 100px);
+  }
 }
 
 .panel {
@@ -119,4 +300,14 @@ button:hover {
 
 .link:hover {
   text-decoration: underline;
+}
+
+/* === NEBULA BACKGROUND DEMO PAGE === */
+/* Styles for nebula-background.html */
+body.nebula-demo {
+  display: block;
+}
+
+body.nebula-demo canvas {
+  position: static;
 }

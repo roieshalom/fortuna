@@ -11,177 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Rye&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="./style.css" />
-
-    <style>
-      /* === GLOBAL / BACKGROUND === */
-      html,
-      body {
-        margin: 0;
-        height: 100%;
-        overflow: hidden;
-        background: #020617;
-      }
-
-      canvas {
-        display: block;
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-      }
-
-      /* === SPLASH OVERLAY === */
-      .splash-overlay {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 2;
-        pointer-events: none;
-        background: transparent;
-      }
-
-      .splash-wrapper {
-        position: relative;
-      }
-
-      .splash-smoke {
-        display: none;
-      }
-
-      /* MAGIC WHEEL */
-        .splash-wheel {
-          position: absolute;
-          inset: 50% auto auto 50%;
-          transform: translate(-50%, -50%) scale(0.4);
-          width: min(50vmin, 360px);
-          height: auto;
-          opacity: 0;
-          z-index: -1;
-          filter: drop-shadow(0 0 16px rgba(243, 213, 107, 0.7));
-          /* earlier start: 0.5 + 0.5*3 = 2.0s */
-          animation:
-            wheel-appear 1s ease-out forwards 2s,
-            wheel-rotate 40s linear infinite 2s;
-        }
-
-        @keyframes wheel-appear {
-          0% {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.2);
-          }
-          100% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(0.5);
-          }
-        }
-
-        @keyframes wheel-rotate {
-          0% {
-            transform: translate(-50%, -50%) scale(1) rotate(0deg);
-          }
-          100% {
-            transform: translate(-50%, -50%) scale(1) rotate(360deg);
-          }
-        }
-
-
-      .splash-title {
-        position: relative;
-        font-family: 'Rye', system-ui, sans-serif;
-        font-size: clamp(3rem, 8vw, 5rem);
-        letter-spacing: 0.05em; /* closer letters */
-        text-transform: uppercase;
-        color: #f3d56b;
-        text-shadow:
-          0 0 8px rgba(247, 225, 137, 0.8),
-          0 0 26px rgba(122, 246, 255, 0.45),
-          0 0 40px rgba(123, 63, 196, 0.7);
-        pointer-events: none;
-        opacity: 0;
-        transform: translateY(20px) scale(0.85);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.05em;
-        /* runs for 3s, but starts after 0.5s so first 0.5s is only bg */
-        animation: title-intro 3s ease-out forwards;
-        animation-delay: 0.5s;
-      }
-
-      .splash-line {
-        display: flex;
-        justify-content: center;
-      }
-
-      .splash-line span {
-        display: inline-block;
-      }
-
-      /* Intro: slow ease-in, no wobble */
-      @keyframes title-intro {
-        0% {
-          opacity: 0;
-          transform: translateY(40px) scale(0.7);
-        }
-        70% {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-        100% {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-      }
-
-      /* After app shows: move title to top */
-      .splash-title.to-top {
-        position: fixed;
-        top: 16px;
-        left: 50%;
-        transform: translateX(-50%) translateY(0) scale(0.7);
-        font-size: clamp(1.6rem, 4vw, 2.4rem);
-        letter-spacing: 0.05em;
-        z-index: 3;
-        animation: title-stick-top 0.9s ease-in-out forwards;
-        pointer-events: none;
-      }
-
-      @keyframes title-stick-top {
-        0% {
-          top: 50%;
-          transform: translate(-50%, -50%) scale(1);
-        }
-        100% {
-          top: 16px;
-          transform: translateX(-50%) translateY(0) scale(0.7);
-        }
-      }
-
-      /* hide app until splash finished */
-      .app {
-        position: relative;
-        z-index: 1;
-        opacity: 0;
-        transition: opacity 0.8s ease;
-      }
-      .app.visible {
-        opacity: 1;
-      }
-
-      @media (max-width: 768px) {
-        .splash-title {
-          font-size: clamp(2.4rem, 10vw, 3.2rem);
-        }
-        .splash-title.to-top {
-          font-size: clamp(1.4rem, 6vw, 2rem);
-        }
-        .splash-wheel {
-          width: min(50vmin, 320px);                  /* much smaller on narrow screens */
-          transform: translate(-50%, -50%) scale(0.8);
-        }
-      }
-    </style>
   </head>
   <body>
     <!-- Nebula background canvas -->
@@ -348,22 +177,124 @@
       const splash = document.getElementById("splash");
       const appRoot = document.getElementById("app-root");
       const splashTitle = document.getElementById("splash-title");
+      const splashWheel = document.querySelector(".splash-wheel");
 
-      // text anim: 0.5s delay + 3s = 3.5s; wheel fade: 2.9–4.4s; +1s hold → ~5.4s
+      // Title intro: 0.5s delay + 3s duration = 3.5s finish
+      // Wait 1000ms after splash finishes = 4.5s total
+      const splashFinishTime = 3500; // 0.5s delay + 3s animation
+      const transitionDelay = 1000; // 1000ms after splash finishes
+      const totalDelay = splashFinishTime + transitionDelay; // 4.5s
+
       setTimeout(() => {
+        // Move title and wheel to body to keep them visible during transition
+        if (splashTitle) {
+          const rect = splashTitle.getBoundingClientRect();
+          const computedStyle = window.getComputedStyle(splashTitle);
+          
+          // Capture the center point of the title
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          
+          // Calculate target scale: final width should be 25% of viewport width
+          const currentWidth = rect.width;
+          const targetWidth = window.innerWidth * 0.25;
+          const targetScale = targetWidth / currentWidth;
+          
+          console.log("Moving title - center:", centerX, centerY, "scale:", targetScale);
+          
+          // Move to body to make it independent of splash overlay
+          document.body.appendChild(splashTitle);
+          
+          // Preserve current visual position - center it at its current location
+          splashTitle.style.position = "fixed";
+          splashTitle.style.top = centerY + "px";
+          splashTitle.style.left = centerX + "px";
+          splashTitle.style.transform = "translate(-50%, -50%) scale(1)";
+          splashTitle.style.fontSize = computedStyle.fontSize;
+          splashTitle.style.fontFamily = computedStyle.fontFamily;
+          splashTitle.style.color = computedStyle.color;
+          splashTitle.style.textShadow = computedStyle.textShadow;
+          splashTitle.style.zIndex = "10";
+          splashTitle.style.opacity = "1";
+          splashTitle.style.pointerEvents = "none";
+          splashTitle.style.display = "flex";
+          splashTitle.style.flexDirection = "column";
+          splashTitle.style.alignItems = "center";
+          splashTitle.style.gap = "0.05em";
+          
+          // Store initial position and target scale for animation
+          splashTitle.style.setProperty("--start-top", centerY + "px");
+          splashTitle.style.setProperty("--start-left", centerX + "px");
+          splashTitle.style.setProperty("--target-scale", targetScale);
+          
+          // Force reflow to ensure position is set
+          splashTitle.offsetHeight;
+        }
+        
+        // Handle wheel with same timing and requirements
+        if (splashWheel) {
+          const wheelRect = splashWheel.getBoundingClientRect();
+          const wheelComputedStyle = window.getComputedStyle(splashWheel);
+          
+          // Capture the center point of the wheel
+          const wheelCenterX = wheelRect.left + wheelRect.width / 2;
+          const wheelCenterY = wheelRect.top + wheelRect.height / 2;
+          
+          // Calculate target scale: final width should be 25% of viewport width (same as title)
+          const wheelCurrentWidth = wheelRect.width;
+          const wheelTargetWidth = window.innerWidth * 0.25;
+          const wheelTargetScale = wheelTargetWidth / wheelCurrentWidth;
+          
+          console.log("Moving wheel - center:", wheelCenterX, wheelCenterY, "scale:", wheelTargetScale);
+          
+          // Move to body to make it independent of splash overlay
+          document.body.appendChild(splashWheel);
+          
+          // Preserve current visual position - center it at its current location
+          splashWheel.style.position = "fixed";
+          splashWheel.style.top = wheelCenterY + "px";
+          splashWheel.style.left = wheelCenterX + "px";
+          splashWheel.style.transform = "translate(-50%, -50%) scale(1) rotate(0deg)";
+          splashWheel.style.width = wheelComputedStyle.width;
+          splashWheel.style.height = wheelComputedStyle.height;
+          splashWheel.style.filter = wheelComputedStyle.filter;
+          splashWheel.style.zIndex = "9"; // Behind title but above app
+          splashWheel.style.opacity = "1";
+          splashWheel.style.pointerEvents = "none";
+          
+          // Store initial position and target scale for animation
+          splashWheel.style.setProperty("--start-top", wheelCenterY + "px");
+          splashWheel.style.setProperty("--start-left", wheelCenterX + "px");
+          splashWheel.style.setProperty("--target-scale", wheelTargetScale);
+          
+          // Force reflow to ensure position is set
+          splashWheel.offsetHeight;
+        }
+        
+        // Trigger animations for both at the same time
+        setTimeout(() => {
+          if (splashTitle) {
+            console.log("Adding to-top class to title");
+            splashTitle.classList.add("to-top");
+          }
+          if (splashWheel) {
+            console.log("Adding to-top class to wheel");
+            splashWheel.classList.add("to-top");
+          }
+        }, 100);
+
+        // Show the app (input box appears)
         appRoot.classList.add("visible");
 
-        if (splashTitle) {
-          splashTitle.classList.add("to-top");
-        }
-
+        // Fade out the splash overlay background (title and wheel are now independent)
         splash.style.transition = "opacity 0.8s ease";
         splash.style.opacity = "0";
 
+        // Hide splash overlay after fade completes
         setTimeout(() => {
           splash.style.display = "none";
         }, 900);
-      }, 7000);
+      }, totalDelay);
     </script>
 
     <!-- Your existing app JS -->

@@ -1,6 +1,7 @@
 {
   "name": "fortuna",
   "version": "1.0.0",
+  "type": "module",
   "main": "src/server/index.js",
   "scripts": {
     "start": "node src/server/index.js"
