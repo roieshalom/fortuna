@@ -1,8 +1,10 @@
+// src/server/index.js
 import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
+import OpenAI from "openai";
 
 dotenv.config();
 
@@ -23,17 +25,44 @@ app.use(express.static(clientPath));
 const assetsPath = path.join(__dirname, "assets");
 app.use("/server/assets", express.static(assetsPath));
 
-// Simple fortune API
-const fortunes = [
-  "The nebula whispers: change brings clarity.",
-  "Your question echoes in the cosmos; patience will reveal the answer.",
-  "A new path forms where doubt once lived.",
-  "Trust the quiet signal beneath the noise."
-];
+// OpenAI setup
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
-app.post("/api/fortune", (req, res) => {
-  const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
-  res.json({ fortune });
+// AI Fortune API
+app.post("/api/fortune", async (req, res) => {
+  const { question } = req.body;
+
+  if (!question) {
+    return res.status(400).json({ fortune: "Ask a question to consult the nebula." });
+  }
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "You are a mystical fortune teller consulting the cosmic nebula. Give brief, poetic fortunes (2-3 sentences max) in response to questions. Be cryptic yet hopeful."
+        },
+        {
+          role: "user",
+          content: question
+        }
+      ],
+      max_tokens: 100,
+      temperature: 0.9
+    });
+
+    const fortune = completion.choices[0].message.content.trim();
+    res.json({ fortune });
+  } catch (error) {
+    console.error("OpenAI error:", error);
+    res.status(500).json({ 
+      fortune: "The nebula is silent. Try again." 
+    });
+  }
 });
 
 // SPA fallback
