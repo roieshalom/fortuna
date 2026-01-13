@@ -120,7 +120,167 @@ canvas {
     transform: translate(-50%, -50%) scale(1);
   }
   100% {
-    top: 120px;
+    top: 100px;
+    left: 50%;
+    transform: translate(-50%, 0) scale(0.75);  /* 35% instead of 25% */
+  }
+}
+
+.panel {
+  position: relative;
+  background: transparent;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.fortune-output {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 18px;
+  padding: 12px 12px 10px;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  min-height: 0;
+}
+
+
+@import url('https://fonts.googleapis.com/css2?family=Macondo&display=swap');
+
+
+:root {
+  --bg: #020617;
+  --panel: rgba(15, 23, 42, 0.9);
+  --accent: #a855f7;
+  --accent-soft: #04f2ff;
+  --text: #e5e7eb;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* === GLOBAL / BACKGROUND === */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #020617;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    sans-serif;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+canvas {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* === SPLASH OVERLAY === */
+.splash-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;   /* vertical center */
+  justify-content: center; /* horizontal center */
+  z-index: 2;
+  pointer-events: none;
+  background: transparent;
+}
+
+.splash-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.splash-smoke {
+  display: none;
+}
+
+.splash-title {
+  position: relative;
+  font-family: 'Rye', system-ui, sans-serif;
+  font-size: clamp(3rem, 8vw, 5rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #f3d56b;
+  text-shadow:
+    0 0 8px rgba(247, 225, 137, 0.8),
+    0 0 26px rgba(122, 246, 255, 0.45),
+    0 0 40px rgba(123, 63, 196, 0.7);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(20px) scale(0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;  /* add this */
+  text-align: center;       /* add this */
+  gap: 0.05em;
+  animation: title-intro 2s ease-out forwards;
+  animation-delay: 0.5s;
+}
+
+.splash-line {
+  display: flex;
+  justify-content: center;
+}
+
+.splash-line span {
+  display: inline-block;
+}
+
+@keyframes title-intro {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.7);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* After app shows: move title to top header - just slide up, no resize */
+.splash-title.to-top {
+  animation: title-slide-up 0.9s ease-in-out forwards;
+}
+
+@keyframes title-slide-up {
+  0% {
+    top: var(--start-top, 50%);
+    left: var(--start-left, 50%);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    top: 100px;
     left: 50%;
     transform: translate(-50%, 0) scale(0.75);  /* 35% instead of 25% */
   }
@@ -132,13 +292,14 @@ canvas {
   z-index: 20;
   opacity: 0;
   transition: opacity 0.8s ease;
-  width: 100%;
-  max-width: 560px;
+  width: 700px;
+  max-width: 700px;
   padding: 24px;
+  margin-top: -220px;
 }
 
 .app.visible {
-  opacity: 1;
+  opacity: 1;  /* only controls opacity now */
 }
 
 @media (max-width: 768px) {
@@ -195,7 +356,82 @@ input::placeholder {
 }
 
 button {
-  margin-top: 12px;
+  margin: 0;  /* change from margin-top: 24px */
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+  color: #020617;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.05);
+}
+
+.placeholder {
+  color: #6b7280;
+}
+
+.link {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 0.8rem;
+  color: var(--accent-soft);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* === NEBULA BACKGROUND DEMO PAGE === */
+/* Styles for nebula-background.html */
+body.nebula-demo {
+  display: block;
+}
+
+body.nebula-demo canvas {
+  position: static;
+}
+
+
+@media (max-width: 768px) {
+  .splash-title {
+    font-size: clamp(2.4rem, 10vw, 3.2rem);
+  }
+  .splash-title.to-top {
+    font-size: clamp(1.4rem, 6vw, 2rem);
+  }
+}
+
+h1 {
+  display: none
+}
+
+.tagline {
+  margin: 0 0 20px;
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+label {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 6px;
+  color: #9ca3af;
+}
+
+
+button {
+  margin: 0;  /* change from margin-top: 24px */
   width: 100%;
   padding: 10px 14px;
   border-radius: 999px;
