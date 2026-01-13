@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Macondo&display=swap');
+
+
 :root {
   --bg: #020617;
   --panel: rgba(15, 23, 42, 0.9);
@@ -117,9 +120,9 @@ canvas {
     transform: translate(-50%, -50%) scale(1);
   }
   100% {
-    top: 16px;
+    top: 120px;
     left: 50%;
-    transform: translate(-50%, 0) scale(var(--target-scale, 0.25));
+    transform: translate(-50%, 0) scale(0.75);  /* 35% instead of 25% */
   }
 }
 
@@ -130,7 +133,7 @@ canvas {
   opacity: 0;
   transition: opacity 0.8s ease;
   width: 100%;
-  max-width: 480px;
+  max-width: 560px;
   padding: 24px;
 }
 
@@ -147,19 +150,8 @@ canvas {
   }
 }
 
-.panel {
-  background: var(--panel);
-  border-radius: 16px;
-  padding: 24px 20px 20px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.9);
-  backdrop-filter: blur(18px);
-}
-
 h1 {
-  margin: 0 0 4px;
-  font-size: 1.8rem;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+  display: none
 }
 
 .tagline {
@@ -179,18 +171,27 @@ label {
 
 input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 30px 12px;
+  min-height: 120px;
   border-radius: 10px;
   border: 1px solid #1f2937;
   background: rgba(15, 23, 42, 0.7);
   color: var(--text);
   font-size: 0.95rem;
   outline: none;
+  text-align: center;  /* centers both placeholder and typed text */
 }
 
 input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.4);
+}
+
+input::placeholder {
+  font-family: 'Macondo', cursive;
+  font-size: 1.2rem;
+  color: #6b7280;
+  opacity: 0.8;
 }
 
 button {
@@ -210,16 +211,6 @@ button {
 
 button:hover {
   filter: brightness(1.05);
-}
-
-.fortune-output {
-  margin-top: 18px;
-  min-height: 52px;
-  padding: 12px 12px 10px;
-  border-radius: 10px;
-  background: rgba(15, 23, 42, 0.7);
-  font-size: 0.95rem;
-  line-height: 1.4;
 }
 
 .placeholder {
