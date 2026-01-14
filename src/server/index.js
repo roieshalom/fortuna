@@ -36,15 +36,52 @@ const openai = new OpenAI({
 const airtableBase = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
   .base(process.env.AIRTABLE_BASE_ID);
 
+// Helper function to get location from IP
+async function getLocationFromIP(ip) {
+  try {
+    // Handle localhost/local IPs
+    if (ip === '::1' || ip === '127.0.0.1' || ip.startsWith('192.168.') || ip.startsWith('10.')) {
+      return { city: 'Local', country: 'Local' };
+    }
+
+    const response = await fetch(`https://ipapi.co/${ip}/json/`);
+    const data = await response.json();
+    
+    return {
+      city: data.city || 'Unknown',
+      country: data.country_name || 'Unknown'
+    };
+  } catch (error) {
+    console.error("Failed to get location:", error);
+    return { city: 'Unknown', country: 'Unknown' };
+  }
+}
+
 // AI Fortune API
 app.post("/api/fortune", async (req, res) => {
   const { question } = req.body;
+  console.log("=== NEW REQUEST ===");
+console.log("Headers:", req.headers);
+
 
   if (!question) {
     return res.status(400).json({ fortune: "Ask a question to consult the nebula." });
   }
 
   try {
+// Get user IP
+const userIP = req.headers['x-forwarded-for']?.split(',')[0].trim() || 
+               req.connection.remoteAddress || 
+               req.socket.remoteAddress ||
+               req.ip;
+
+console.log("🔍 Extracted User IP:", userIP);
+
+
+    // Get location from IP
+    const location = await getLocationFromIP(userIP);
+    console.log("Location:", location);
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -63,30 +100,33 @@ app.post("/api/fortune", async (req, res) => {
 
     const fortune = completion.choices[0].message.content.trim();
     
-// Log to Airtable
-console.log("Attempting to log to Airtable...");
-try {
-  await airtableBase('Questions').create([
-    {
-      fields: {
-        Timestamp: new Date().toISOString(),
-        Question: question,
-        Fortune: fortune
-      }
+    // Log to Airtable with location
+    console.log("Attempting to log to Airtable...");
+    try {
+      await airtableBase('Questions').create([
+        {
+          fields: {
+            Timestamp: new Date().toISOString(),
+            Question: question,
+            Fortune: fortune,
+            City: location.city,
+            Country: location.country
+          }
+        }
+      ]);
+      console.log("✅ Logged to Airtable successfully");
+    } catch (airtableError) {
+      console.error("❌ Failed to log to Airtable:", airtableError);
+      // Don't fail the request if logging fails
     }
-  ]);
-  console.log("✅ Logged to Airtable successfully");
-} catch (airtableError) {
-  console.error("❌ Failed to log to Airtable:", airtableError);
-  // Don't fail the request if logging fails
-}
-
 
     // Also keep local JSON logging for development
     const logEntry = {
       timestamp: new Date().toISOString(),
       question,
-      fortune
+      fortune,
+      city: location.city,
+      country: location.country
     };
     
     try {
