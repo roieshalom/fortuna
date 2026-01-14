@@ -117,8 +117,8 @@ canvas {
 
 @keyframes title-slide-up {
   0% {
-    top: var(--start-top, 50%);
-    left: var(--start-left, 50%);
+    top: 50%;  /* remove var, just use 50% */
+    left: 50%;  /* remove var, just use 50% */
     transform: translate(-50%, -50%) scale(1);
   }
   100% {
