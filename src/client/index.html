@@ -70,7 +70,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-      renderer.setClearColor(0x3030ff, 1);  // BRIGHT BLUE - was 0x050816
+      renderer.setClearColor(0x0D47A1, 1);  // BRIGHT BLUE - was 0x050816
 
       const scene = new THREE.Scene();
       scene.fog = new THREE.FogExp2(0x3030ff, 0.005);  // Almost no fog - was 0.02
@@ -81,7 +81,7 @@
         0.1,
         100
       );
-      camera.position.set(0, 0, 5);
+      camera.position.set(0, 0, 0.8);
       camera.lookAt(0, 0, 0);
 
       // SUPER BRIGHT LIGHTS
@@ -95,7 +95,7 @@
       pinkLight.position.set(0, -3, 6);
 
       scene.add(purpleLight, cyanLight, pinkLight);
-      scene.add(new THREE.AmbientLight(0xffffff, 3));  // BRIGHT WHITE - was 0x1f2937, 1.1
+      scene.add(new THREE.AmbientLight(0x1f2937, 1.1));  // BRIGHT WHITE - was 0x1f2937, 1.1
 
 
       const loader = new THREE.TextureLoader();
