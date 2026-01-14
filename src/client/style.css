@@ -251,11 +251,25 @@ label {
 }
 
 /* === MOBILE ADJUSTMENTS === */
-@media (max-width: 480px) {
+@media (max-width: px) {
+  @keyframes title-slide-up {
+    0% {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+      top: 50px;
+      left: 50%;
+      transform: translate(-50%, 0) scale(0.7);  /* bigger - was 0.7 */
+    }
+  }
+  
   .app {
-    top: 170px;
+    top: 180px;  /* adjust down since logo is bigger */
   }
 }
+
 
 /* === NEBULA BACKGROUND DEMO PAGE === */
 body.nebula-demo {

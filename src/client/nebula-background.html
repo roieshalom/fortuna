@@ -16,8 +16,8 @@
     </script>
   </head>
   <body class="nebula-demo">
-    <canvas id="bg-canvas"></canvas>
-        <script type="module">
+    anvas id="bg-canvas"></canvas>
+    <script type="module">
       import * as THREE from "three";
 
       const canvas = document.getElementById("bg-canvas");
@@ -25,12 +25,12 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-      // Background
-      renderer.setClearColor(0x050816, 1);
+      // EXTREME TEST - BRIGHT BLUE BACKGROUND
+      renderer.setClearColor(0x3030ff, 1);
 
       const scene = new THREE.Scene();
-      // Fog strength (higher = more fade into background)
-      scene.fog = new THREE.FogExp2(0x050816, 0.02); // <---- fog density
+      // Almost no fog
+      scene.fog = new THREE.FogExp2(0x3030ff, 0.005);
 
       // Camera
       const camera = new THREE.PerspectiveCamera(
@@ -42,18 +42,18 @@
       camera.position.set(0, 0, 5);
       camera.lookAt(0, 0, 0);
 
-      // Lights
-      const purpleLight = new THREE.PointLight(0xd946ff, 2.4, 80);
+      // SUPER BRIGHT LIGHTS
+      const purpleLight = new THREE.PointLight(0xd946ff, 10, 150);
       purpleLight.position.set(-2.5, 2, 8);
 
-      const cyanLight = new THREE.PointLight(0x5ee7ff, 2.0, 80);
+      const cyanLight = new THREE.PointLight(0x5ee7ff, 10, 150);
       cyanLight.position.set(3, -1.5, 7);
 
-      const pinkLight = new THREE.PointLight(0xff6ad5, 1.8, 70);
+      const pinkLight = new THREE.PointLight(0xff6ad5, 10, 150);
       pinkLight.position.set(0, -3, 6);
 
       scene.add(purpleLight, cyanLight, pinkLight);
-      scene.add(new THREE.AmbientLight(0x1f2937, 1.1));
+      scene.add(new THREE.AmbientLight(0xffffff, 3));
 
       // Smoke texture
       const loader = new THREE.TextureLoader();
@@ -71,8 +71,7 @@
           map: smokeTexture,
           color: tint,
           transparent: true,
-          // CLOUD VISIBILITY: raise/lower this to change density
-          opacity: 0.95,           // <---- try 0.8–1.0
+          opacity: 0.95,
           depthWrite: false,
           side: THREE.DoubleSide
         });
@@ -114,14 +113,12 @@
 
         clouds.forEach((cloud, i) => {
           const dir = i % 2 === 0 ? 1 : -1;
-          // SPEED: higher value = faster rotation
-          cloud.rotation.z += 0.0022 * dir; // <---- try 0.001–0.004
+          cloud.rotation.z += 0.0022 * dir;
         });
 
         renderer.render(scene, camera);
       }
       animate();
     </script>
-
   </body>
 </html>
