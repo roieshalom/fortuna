@@ -155,7 +155,7 @@
 
         clouds.forEach((cloud, i) => {
           const dir = i % 2 === 0 ? 1 : -1;
-          cloud.rotation.z += 0.0022 * dir;
+          cloud.rotation.z += 0.001 * dir;
         });
 
         renderer.render(scene, camera);
