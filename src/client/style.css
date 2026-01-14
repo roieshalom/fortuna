@@ -61,7 +61,7 @@ canvas {
 .splash-title {
   position: relative;
   font-family: 'Rye', system-ui, sans-serif;
-  font-size: clamp(3rem, 8vw, 5rem);
+  font-size: clamp(3rem, 10vw, 5rem);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #f3d56b;
@@ -80,7 +80,6 @@ canvas {
   gap: 0.05em;
   animation: title-intro 2s ease-out forwards;
   animation-delay: 0.5s;
-  transition: font-size 0.9s ease-out;  /* ADD THIS - smooth size transition */
 }
 
 .splash-line {
@@ -109,29 +108,25 @@ canvas {
 
 .splash-title.to-top {
   animation: title-slide-up 0.9s ease-in-out forwards;
-  font-size: min(3.5rem, 7.5vw) !important;  /* shrinks with viewport, max 3.5rem */
-  width: auto;  /* remove fixed width */
-  max-width: 85%;  /* matches field width percentage */
-  transform-origin: center bottom;  /* shrink from bottom-middle */
 }
 
 @keyframes title-slide-up {
   0% {
-    top: 50%;  /* remove var, just use 50% */
-    left: 50%;  /* remove var, just use 50% */
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%) scale(1);
   }
   100% {
     top: 50px;
     left: 50%;
-    transform: translate(-50%, 0) scale(1);
+    transform: translate(-50%, 0) scale(0.7);
   }
 }
 
 /* === APP CONTAINER === */
 .app {
   position: fixed;
-  top: 200px;  /* fixed value based on fixed logo size */
+  top: 200px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 20;
@@ -141,7 +136,6 @@ canvas {
   max-width: 450px;
   padding: 20px;
 }
-
 
 .app.visible {
   opacity: 1;
@@ -254,4 +248,20 @@ label {
   letter-spacing: 0.16em;
   margin-bottom: 6px;
   color: #9ca3af;
+}
+
+/* === MOBILE ADJUSTMENTS === */
+@media (max-width: 480px) {
+  .app {
+    top: 170px;
+  }
+}
+
+/* === NEBULA BACKGROUND DEMO PAGE === */
+body.nebula-demo {
+  display: block;
+}
+
+body.nebula-demo canvas {
+  position: static;
 }
