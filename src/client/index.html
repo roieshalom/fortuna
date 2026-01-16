@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <title>Ask Esmeralda</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+  <link rel="manifest" href="/manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Consult the cosmic nebula and receive mystical fortunes from Esmeralda">
   <meta property="og:title" content="Ask Esmeralda">
@@ -18,6 +22,7 @@
 
   <link rel="stylesheet" href="./style.css" />
 </head>
+
   <body>
 
     <!-- Nebula background canvas -->
@@ -55,7 +60,7 @@
 
   <!-- Consulting overlay -->
   <div class="consulting-overlay" id="consulting-overlay" aria-hidden="true">
-    <div class="consulting-smoke"></div>
+    anvas id="consulting-canvas" class="consulting-smoke"></canvas>
     <div class="consulting-loader">
       <div class="loader-orbit">
         <span class="loader-dot"></span>
@@ -64,6 +69,7 @@
       </div>
     </div>
   </div>
+
 
     <!-- Nebula background script -->
     <script type="importmap">
