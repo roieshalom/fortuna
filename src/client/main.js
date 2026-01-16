@@ -1,31 +1,206 @@
 // src/client/main.js
+import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
+
+console.log("main.js loaded");
 
 const form = document.getElementById("fortune-form");
 const questionInput = document.getElementById("question");
 const output = document.getElementById("fortune-output");
+const appInner = document.getElementById("app-inner");
+const consultingOverlay = document.getElementById("consulting-overlay");
+const consultingCanvas = document.getElementById("consulting-canvas");
+
+let consultingScene = null;
+let consultingRenderer = null;
+let consultingClouds = [];
+let consultingAnimationId = null;
+
+// Create the consulting cloud scene
+function startConsultingClouds() {
+  console.log("startConsultingClouds called");
+  console.log("consultingCanvas:", consultingCanvas);
+  
+  if (!consultingCanvas) {
+    console.error("Canvas not found!");
+    return;
+  }
+  
+  console.log("Creating consulting clouds...");
+
+  // Set up renderer
+  consultingRenderer = new THREE.WebGLRenderer({
+    canvas: consultingCanvas,
+    antialias: true,
+    alpha: true
+  });
+  consultingRenderer.setSize(window.innerWidth, window.innerHeight);
+  consultingRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  consultingRenderer.setClearColor(0x000000, 0); // Transparent
+
+  consultingScene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(
+    45,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    100
+  );
+  camera.position.set(0, -1.5, 2); // Lower, looking up
+  camera.lookAt(0, 0, 0);
+
+  // Dramatic lighting
+  const purpleLight = new THREE.PointLight(0xd946ff, 8, 120);
+  purpleLight.position.set(-2, 1, 5);
+
+  const cyanLight = new THREE.PointLight(0x5ee7ff, 8, 120);
+  cyanLight.position.set(2, -1, 5);
+
+  const pinkLight = new THREE.PointLight(0xff6ad5, 6, 100);
+  pinkLight.position.set(0, -2, 4);
+
+  consultingScene.add(purpleLight, cyanLight, pinkLight);
+  consultingScene.add(new THREE.AmbientLight(0x1f2937, 0.8));
+
+  // Load smoke texture
+  const loader = new THREE.TextureLoader();
+  const smokeTexture = loader.load("/server/assets/smoke.png");
+
+  const cloudGeo = new THREE.PlaneGeometry(5, 5);
+  consultingClouds = [];
+
+  // Spawn 25 clouds rising from below
+  for (let i = 0; i < 25; i++) {
+    const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
+    const tint = tintColors[i % tintColors.length];
+
+    const material = new THREE.MeshLambertMaterial({
+      map: smokeTexture,
+      color: tint,
+      transparent: true,
+      opacity: 0.9,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+
+    const cloud = new THREE.Mesh(cloudGeo, material);
+
+    // Position clouds below the viewport, spread out
+    cloud.position.set(
+      (Math.random() - 0.5) * 6,
+      -3 - Math.random() * 2, // Start below screen
+      -2 - Math.random() * 2
+    );
+
+    cloud.rotation.z = Math.random() * Math.PI * 2;
+
+    // Store upward velocity for animation
+    cloud.userData.riseSpeed = 0.015 + Math.random() * 0.01;
+    cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.002;
+
+    consultingScene.add(cloud);
+    consultingClouds.push(cloud);
+  }
+
+  console.log("Created", consultingClouds.length, "clouds");
+
+  // Animation loop
+  function animateClouds() {
+    consultingAnimationId = requestAnimationFrame(animateClouds);
+
+    consultingClouds.forEach((cloud) => {
+      // Rise upward
+      cloud.position.y += cloud.userData.riseSpeed;
+      // Rotate slowly
+      cloud.rotation.z += cloud.userData.rotSpeed;
+
+      // Loop back down if it rises too high
+      if (cloud.position.y > 4) {
+        cloud.position.y = -3 - Math.random() * 2;
+      }
+    });
+
+    consultingRenderer.render(consultingScene, camera);
+  }
+
+  animateClouds();
+}
+
+// Clean up the consulting scene
+function stopConsultingClouds() {
+  if (consultingAnimationId) {
+    cancelAnimationFrame(consultingAnimationId);
+    consultingAnimationId = null;
+  }
+
+  if (consultingRenderer) {
+    consultingRenderer.dispose();
+    consultingRenderer = null;
+  }
+
+  consultingClouds.forEach((cloud) => {
+    if (cloud.geometry) cloud.geometry.dispose();
+    if (cloud.material) {
+      if (cloud.material.map) cloud.material.map.dispose();
+      cloud.material.dispose();
+    }
+  });
+
+  consultingClouds = [];
+  consultingScene = null;
+}
+
+async function fetchFortune(question) {
+  const res = await fetch("/api/fortune", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ question })
+  });
+
+  if (!res.ok) {
+    throw new Error("Network response was not ok");
+  }
+
+  const data = await res.json();
+  return data.fortune || "The nebula murmurs, but softly.";
+}
 
 if (form && questionInput && output) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    output.textContent = "Consulting the stars…";
+    const question = questionInput.value.trim();
+    if (!question) return;
+
+    // Start consulting state
+    if (appInner) {
+      appInner.classList.add("app-consulting");
+    }
+    if (consultingOverlay) {
+      consultingOverlay.classList.add("visible");
+      console.log("Overlay visible, about to start clouds");
+      // Spawn clouds after overlay is visible
+      setTimeout(startConsultingClouds, 100);
+    }
+
+    output.textContent = "";
 
     try {
-      const res = await fetch("/api/fortune", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: questionInput.value })
-      });
-
-      if (!res.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const data = await res.json();
-      output.textContent = data.fortune || "The nebula murmurs, but softly.";
+      const fortune = await fetchFortune(question);
+      output.textContent = fortune;
     } catch (err) {
       console.error(err);
       output.textContent = "The nebula is silent. Try again.";
+    } finally {
+      // End consulting state
+      if (appInner) {
+        appInner.classList.remove("app-consulting");
+      }
+      if (consultingOverlay) {
+        consultingOverlay.classList.remove("visible");
+      }
+
+      // Clean up clouds after fade
+      setTimeout(stopConsultingClouds, 600);
     }
   });
 }

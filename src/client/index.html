@@ -35,24 +35,35 @@
       </div>
     </div>
 
-    <!-- Main app content -->
-    <main class="app" id="app-root">
-  <section class="panel">
-    <form id="fortune-form">
-      <input
-        id="question"
-        name="question"
-        type="text"
-        placeholder="What do you seek?"
-        required
-      />
-      <button type="submit">Reveal Fortune</button>
-    </form>
+  <!-- Main app content -->
+  <main class="app" id="app-root">
+    <section class="panel app-inner" id="app-inner">
+      <form id="fortune-form">
+        <input
+          id="question"
+          name="question"
+          type="text"
+          placeholder="What do you seek?"
+          required
+        />
+        <button type="submit">Reveal Fortune</button>
+      </form>
 
-    <div id="fortune-output" class="fortune-output"></div>
-  </section>
-</main>
+      <div id="fortune-output" class="fortune-output"></div>
+    </section>
+  </main>
 
+  <!-- Consulting overlay -->
+  <div class="consulting-overlay" id="consulting-overlay" aria-hidden="true">
+    <div class="consulting-smoke"></div>
+    <div class="consulting-loader">
+      <div class="loader-orbit">
+        <span class="loader-dot"></span>
+        <span class="loader-dot"></span>
+        <span class="loader-dot"></span>
+      </div>
+    </div>
+  </div>
 
     <!-- Nebula background script -->
     <script type="importmap">
