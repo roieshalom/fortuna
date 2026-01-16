@@ -65,11 +65,11 @@ function startConsultingClouds() {
   const loader = new THREE.TextureLoader();
   const smokeTexture = loader.load("/server/assets/smoke.png");
 
-  const cloudGeo = new THREE.PlaneGeometry(5, 5);
+  const cloudGeo = new THREE.PlaneGeometry(7, 7);
   consultingClouds = [];
 
-  // Spawn 25 clouds rising from below
-  for (let i = 0; i < 25; i++) {
+  // Spawn 40 clouds rising from below
+  for (let i = 0; i < 40; i++) {
     const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
     const tint = tintColors[i % tintColors.length];
 
@@ -77,7 +77,7 @@ function startConsultingClouds() {
       map: smokeTexture,
       color: tint,
       transparent: true,
-      opacity: 0.9,
+      opacity: 1,
       depthWrite: false,
       side: THREE.DoubleSide
     });
@@ -86,16 +86,16 @@ function startConsultingClouds() {
 
     // Position clouds below the viewport, spread out
     cloud.position.set(
-      (Math.random() - 0.5) * 6,
-      -3 - Math.random() * 2, // Start below screen
-      -2 - Math.random() * 2
+      (Math.random() - 0.5) * 8,
+      -4 - Math.random() * 2, // Start lower
+      -1 - Math.random() * 2
     );
 
     cloud.rotation.z = Math.random() * Math.PI * 2;
 
     // Store upward velocity for animation
     cloud.userData.riseSpeed = 0.015 + Math.random() * 0.01;
-    cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.002;
+    cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
 
     consultingScene.add(cloud);
     consultingClouds.push(cloud);
@@ -114,10 +114,10 @@ function startConsultingClouds() {
       cloud.rotation.z += cloud.userData.rotSpeed;
 
       // Loop back down if it rises too high
-      if (cloud.position.y > 4) {
-        cloud.position.y = -3 - Math.random() * 2;
+      if (cloud.position.y > 6) {
+        cloud.position.y = -4 - Math.random() * 2;
       }
-    });
+    }); // <-- FIXED: Added closing brace for forEach
 
     consultingRenderer.render(consultingScene, camera);
   }
