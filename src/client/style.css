@@ -152,14 +152,14 @@ canvas {
   transition:
     transform 0.5s ease,
     filter 0.5s ease,
-    opacity 0.5s ease;
+    opacity 1.2s ease;
 }
 
 /* When consulting: fade, blur, and shrink slightly */
 .app-inner.app-consulting {
-  transform: scale(0.95);
-  filter: blur(3px) brightness(0.7);
-  opacity: 0.5;
+  transform: scale(0.75);
+  filter: blur(8px) brightness(0.3);
+  opacity: 0.15;
 }
 
 form {
@@ -266,7 +266,7 @@ label {
 .consulting-overlay {
   position: fixed;
   inset: 0;
-  z-index: 15;
+  z-index: 50;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.35s ease;

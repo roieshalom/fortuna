@@ -150,6 +150,12 @@ function stopConsultingClouds() {
 }
 
 async function fetchFortune(question) {
+  // MOCK: Skip API call while testing animation
+  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate short network delay
+  return "The stars whisper of change on the horizon. Trust your instincts, seeker.";
+  
+  // REAL API CALL (commented out for now):
+  /*
   const res = await fetch("/api/fortune", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -162,7 +168,9 @@ async function fetchFortune(question) {
 
   const data = await res.json();
   return data.fortune || "The nebula murmurs, but softly.";
+  */
 }
+
 
 if (form && questionInput && output) {
   form.addEventListener("submit", async (e) => {
@@ -171,26 +179,44 @@ if (form && questionInput && output) {
     const question = questionInput.value.trim();
     if (!question) return;
 
-    // Start consulting state
-    if (appInner) {
-      appInner.classList.add("app-consulting");
-    }
+    // Track when clouds started
+    const cloudsStartTime = Date.now();
+
+    // Start consulting overlay immediately
     if (consultingOverlay) {
       consultingOverlay.classList.add("visible");
       console.log("Overlay visible, about to start clouds");
-      // Spawn clouds after overlay is visible
       setTimeout(startConsultingClouds, 100);
     }
 
+    // DELAY the UI dissolve so clouds rise first
+    setTimeout(() => {
+      if (appInner) {
+        appInner.classList.add("app-consulting");
+      }
+    }, 2400); // Wait before dissolving UI
+
     output.textContent = "";
 
+    let fortune;
     try {
-      const fortune = await fetchFortune(question);
-      output.textContent = fortune;
+      fortune = await fetchFortune(question);
     } catch (err) {
       console.error(err);
-      output.textContent = "The nebula is silent. Try again.";
-    } finally {
+      fortune = "The nebula is silent. Try again.";
+    }
+
+    // Ensure clouds have been visible for at least 2 seconds
+    const elapsed = Date.now() - cloudsStartTime;
+    const minDisplayTime = 6000; // 6 seconds
+    const remainingTime = Math.max(0, minDisplayTime - elapsed);
+
+    console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
+
+    setTimeout(() => {
+      // Show the fortune
+      output.textContent = fortune;
+
       // End consulting state
       if (appInner) {
         appInner.classList.remove("app-consulting");
@@ -201,6 +227,6 @@ if (form && questionInput && output) {
 
       // Clean up clouds after fade
       setTimeout(stopConsultingClouds, 600);
-    }
+    }, remainingTime);
   });
 }
