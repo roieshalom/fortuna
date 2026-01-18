@@ -192,6 +192,13 @@ if (form && questionInput) {
       if (appInner) {
         appInner.classList.add("app-consulting");
       }
+      
+      // Fade out logo at the same time as input box
+      const logo = document.getElementById("splash-title");
+      if (logo) {
+        logo.style.transition = "opacity 1.2s ease";
+        logo.style.opacity = "0";
+      }
     }, 2400);
 
     let fortune;
