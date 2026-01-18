@@ -12,6 +12,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Rye&family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="./style.css" />
+  
+  <style>
+    /* Fortune reveal fade-in animation */
+    .fortune-view.visible {
+      animation: revealFortune 2.5s ease-out forwards;
+    }
+    
+    @keyframes revealFortune {
+      0% {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      40% {
+        opacity: 0; /* Stay hidden while "clouds clear" */
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
 </head>
 <body>
   <!-- Nebula background canvas -->
@@ -136,25 +157,24 @@
     }
     animate();
 
-// Load fortune from sessionStorage
-console.log("Reveal page loaded, checking sessionStorage...");
-const fortuneText = sessionStorage.getItem('fortuneText');
-const userQuestion = sessionStorage.getItem('userQuestion');
+    // Load fortune from sessionStorage
+    console.log("Reveal page loaded, checking sessionStorage...");
+    const fortuneText = sessionStorage.getItem('fortuneText');
+    const userQuestion = sessionStorage.getItem('userQuestion');
 
-console.log("fortuneText:", fortuneText);
-console.log("userQuestion:", userQuestion);
+    console.log("fortuneText:", fortuneText);
+    console.log("userQuestion:", userQuestion);
 
-const fortuneElement = document.getElementById('fortune-text');
+    const fortuneElement = document.getElementById('fortune-text');
 
-if (fortuneText) {
-  console.log("Fortune found! Displaying...");
-  fortuneElement.textContent = fortuneText;
-} else {
-  console.log("No fortune found in sessionStorage, redirecting to home...");
-  // No fortune data - redirect back to home
-  window.location.href = '/';
-}
-
+    if (fortuneText) {
+      console.log("Fortune found! Displaying...");
+      fortuneElement.textContent = fortuneText;
+    } else {
+      console.log("No fortune found in sessionStorage, redirecting to home...");
+      // No fortune data - redirect back to home
+      window.location.href = '/';
+    }
   </script>
 </body>
 </html>

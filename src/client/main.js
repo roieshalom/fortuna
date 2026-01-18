@@ -103,23 +103,32 @@ function startConsultingClouds() {
   console.log("Created", consultingClouds.length, "clouds");
 
   // Animation loop
-  function animateClouds() {
-    consultingAnimationId = requestAnimationFrame(animateClouds);
+let shouldLoop = true; // Track if clouds should loop back
 
-    consultingClouds.forEach((cloud) => {
-      // Rise upward
-      cloud.position.y += cloud.userData.riseSpeed;
-      // Rotate slowly
-      cloud.rotation.z += cloud.userData.rotSpeed;
+function animateClouds() {
+  consultingAnimationId = requestAnimationFrame(animateClouds);
 
-      // Loop back down if it rises too high
-      if (cloud.position.y > 6) {
-        cloud.position.y = -4 - Math.random() * 2;
-      }
-    });
+  consultingClouds.forEach((cloud) => {
+    // Rise upward
+    cloud.position.y += cloud.userData.riseSpeed;
+    // Rotate slowly
+    cloud.rotation.z += cloud.userData.rotSpeed;
 
-    consultingRenderer.render(consultingScene, camera);
-  }
+    // Only loop back down during first phase
+    if (shouldLoop && cloud.position.y > 6) {
+      cloud.position.y = -4 - Math.random() * 2;
+    }
+    // After shouldLoop=false, clouds just keep rising and disappear
+  });
+
+  consultingRenderer.render(consultingScene, camera);
+}
+
+// Stop looping after 4 seconds - clouds will drift away
+setTimeout(() => {
+  shouldLoop = false;
+}, 4000);
+
 
   animateClouds();
 }
@@ -211,9 +220,7 @@ if (form && questionInput) {
 
     // Ensure clouds have been visible for at least 6 seconds
     const elapsed = Date.now() - cloudsStartTime;
-    const minDisplayTime = 6000; // 6 seconds
-    const remainingTime = Math.max(0, minDisplayTime - elapsed);
-
+    const minDisplayTime = 8000; // 8 seconds - gives clouds time to drift away    const remainingTime = Math.max(0, minDisplayTime - elapsed);
     console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
 
     // Store fortune data BEFORE timing delays
