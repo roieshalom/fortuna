@@ -310,9 +310,15 @@ label {
   width: 100%;
   max-width: 550px;
   padding: 20px;
+  margin-top: 20px; /* Add gap from top */
   opacity: 0;
   transform: scale(0.95);
   transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+/* Override app positioning when fortune is showing */
+.app:has(.fortune-view.visible) {
+  top: 60px; /* Much higher when showing fortune */
 }
 
 .fortune-view.visible {
@@ -379,10 +385,23 @@ label {
     }
   }
 
-  .app {
-    top: 180px;
+  /* Fortune card expands and adjusts on mobile */
+  .fortune-view {
+    max-width: 95%;
+    padding: 10px;
+    margin-top: 20px;
+  }
+
+  .fortune-card {
+    padding: 60px 25px;
+  }
+
+  .fortune-text {
+    font-size: 1.15rem;
+    padding: 0 15px;
   }
 }
+
 
 /* === NEBULA BACKGROUND DEMO PAGE === */
 body.nebula-demo {

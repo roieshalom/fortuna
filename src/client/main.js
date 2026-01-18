@@ -116,7 +116,7 @@ function startConsultingClouds() {
       if (cloud.position.y > 6) {
         cloud.position.y = -4 - Math.random() * 2;
       }
-    }); // <-- FIXED: Added closing brace for forEach
+    });
 
     consultingRenderer.render(consultingScene, camera);
   }
@@ -223,6 +223,13 @@ if (form && questionInput) {
         // Trigger animation after a frame
         setTimeout(() => {
           fortuneView.classList.add("visible");
+          
+          // Hide the page logo when fortune appears
+          const logo = document.getElementById("splash-title");
+          if (logo) {
+            logo.style.transition = "opacity 0.6s ease";
+            logo.style.opacity = "0";
+          }
         }, 50);
       }
 
@@ -236,4 +243,3 @@ if (form && questionInput) {
     }, remainingTime);
   });
 }
-
