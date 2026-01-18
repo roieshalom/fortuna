@@ -5,7 +5,6 @@ console.log("main.js loaded");
 
 const form = document.getElementById("fortune-form");
 const questionInput = document.getElementById("question");
-const output = document.getElementById("fortune-output");
 const appInner = document.getElementById("app-inner");
 const consultingOverlay = document.getElementById("consulting-overlay");
 const consultingCanvas = document.getElementById("consulting-canvas");
@@ -171,8 +170,10 @@ async function fetchFortune(question) {
   */
 }
 
+if (form && questionInput) {
+  const fortuneView = document.getElementById("fortune-view");
+  const fortuneText = document.getElementById("fortune-text");
 
-if (form && questionInput && output) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -196,8 +197,6 @@ if (form && questionInput && output) {
       }
     }, 2400); // Wait before dissolving UI
 
-    output.textContent = "";
-
     let fortune;
     try {
       fortune = await fetchFortune(question);
@@ -206,7 +205,7 @@ if (form && questionInput && output) {
       fortune = "The nebula is silent. Try again.";
     }
 
-    // Ensure clouds have been visible for at least 2 seconds
+    // Ensure clouds have been visible for at least 6 seconds
     const elapsed = Date.now() - cloudsStartTime;
     const minDisplayTime = 6000; // 6 seconds
     const remainingTime = Math.max(0, minDisplayTime - elapsed);
@@ -214,13 +213,20 @@ if (form && questionInput && output) {
     console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
 
     setTimeout(() => {
-      // Show the fortune
-      output.textContent = fortune;
+      // SWAP VIEWS: Hide input, show fortune
+      if (appInner) {
+        appInner.style.display = "none";
+      }
+      if (fortuneView && fortuneText) {
+        fortuneText.textContent = fortune;
+        fortuneView.style.display = "block";
+        // Trigger animation after a frame
+        setTimeout(() => {
+          fortuneView.classList.add("visible");
+        }, 50);
+      }
 
       // End consulting state
-      if (appInner) {
-        appInner.classList.remove("app-consulting");
-      }
       if (consultingOverlay) {
         consultingOverlay.classList.remove("visible");
       }
@@ -230,3 +236,4 @@ if (form && questionInput && output) {
     }, remainingTime);
   });
 }
+

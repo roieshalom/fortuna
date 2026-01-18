@@ -19,8 +19,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Rye&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css" />
 </head>
 
@@ -43,6 +42,7 @@
 
   <!-- Main app content -->
   <main class="app" id="app-root">
+    <!-- INPUT VIEW -->
     <section class="panel app-inner" id="app-inner">
       <form id="fortune-form">
         <input
@@ -54,10 +54,22 @@
         />
         <button type="submit">Reveal Fortune</button>
       </form>
-
-      <div id="fortune-output" class="fortune-output"></div>
     </section>
+
+    <!-- FORTUNE REVEAL VIEW (hidden by default) -->
+<section class="fortune-view" id="fortune-view">
+  <div class="fortune-card">
+    <div class="fortune-text" id="fortune-text">
+      <!-- Fortune appears here -->
+    </div>
+  </div>
+  <p class="fortune-message">
+    Esmeralda has spoken. Return when the moon rises anew.
+  </p>
+</section>
+
   </main>
+
 
   <!-- Consulting overlay -->
   <div class="consulting-overlay" id="consulting-overlay" aria-hidden="true">
