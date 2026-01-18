@@ -103,32 +103,31 @@ function startConsultingClouds() {
   console.log("Created", consultingClouds.length, "clouds");
 
   // Animation loop
-let shouldLoop = true; // Track if clouds should loop back
+  let shouldLoop = true; // Track if clouds should loop back
 
-function animateClouds() {
-  consultingAnimationId = requestAnimationFrame(animateClouds);
+  function animateClouds() {
+    consultingAnimationId = requestAnimationFrame(animateClouds);
 
-  consultingClouds.forEach((cloud) => {
-    // Rise upward
-    cloud.position.y += cloud.userData.riseSpeed;
-    // Rotate slowly
-    cloud.rotation.z += cloud.userData.rotSpeed;
+    consultingClouds.forEach((cloud) => {
+      // Rise upward
+      cloud.position.y += cloud.userData.riseSpeed;
+      // Rotate slowly
+      cloud.rotation.z += cloud.userData.rotSpeed;
 
-    // Only loop back down during first phase
-    if (shouldLoop && cloud.position.y > 6) {
-      cloud.position.y = -4 - Math.random() * 2;
-    }
-    // After shouldLoop=false, clouds just keep rising and disappear
-  });
+      // Only loop back down during first phase
+      if (shouldLoop && cloud.position.y > 6) {
+        cloud.position.y = -4 - Math.random() * 2;
+      }
+      // After shouldLoop=false, clouds just keep rising and disappear
+    });
 
-  consultingRenderer.render(consultingScene, camera);
-}
+    consultingRenderer.render(consultingScene, camera);
+  }
 
-// Stop looping after 4 seconds - clouds will drift away
-setTimeout(() => {
-  shouldLoop = false;
-}, 3000);
-
+  // Stop looping after 3 seconds - clouds will drift away
+  setTimeout(() => {
+    shouldLoop = false;
+  }, 5000);
 
   animateClouds();
 }
@@ -208,7 +207,7 @@ if (form && questionInput) {
         logo.style.transition = "opacity 1.2s ease";
         logo.style.opacity = "0";
       }
-    }, 2400);
+    }, 2200);
 
     let fortune;
     try {
@@ -218,19 +217,41 @@ if (form && questionInput) {
       fortune = "The nebula is silent. Try again.";
     }
 
-    // Ensure clouds have been visible for at least 6 seconds
+    // Show fortune after 2 seconds
     const elapsed = Date.now() - cloudsStartTime;
-    const minDisplayTime = 2000; // 8 seconds - gives clouds time to drift away
+    const minDisplayTime = 4000; // 4 seconds
     const remainingTime = Math.max(0, minDisplayTime - elapsed);
     console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
 
-    // Store fortune data BEFORE timing delays
-    sessionStorage.setItem('fortuneText', fortune);
-    sessionStorage.setItem('userQuestion', question);
-
     setTimeout(() => {
-      // Navigate while clouds are still covering
-      window.location.href = './reveal.html';
+      // SWAP VIEWS: Hide input, show fortune (no navigation!)
+      if (appInner) {
+        appInner.style.display = "none";
+      }
+      
+      const fortuneView = document.getElementById("fortune-view");
+      const fortuneText = document.getElementById("fortune-text");
+      
+      if (fortuneView && fortuneText) {
+        fortuneText.textContent = fortune;
+        fortuneView.style.display = "block";
+        
+        // Trigger fade-in animation after a moment
+        setTimeout(() => {
+          fortuneView.classList.add("visible");
+        }, 50);
+      }
+
+      // Fade out and clean up clouds after fortune appears
+      if (consultingOverlay) {
+        consultingOverlay.style.transition = "opacity 1.5s ease-out";
+        consultingOverlay.style.opacity = "0";
+        
+        setTimeout(() => {
+          consultingOverlay.classList.remove("visible");
+          stopConsultingClouds();
+        }, 1500);
+      }
     }, remainingTime);
 
   });
