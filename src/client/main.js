@@ -93,7 +93,7 @@ function startConsultingClouds() {
     cloud.rotation.z = Math.random() * Math.PI * 2;
 
     // Store upward velocity for animation
-    cloud.userData.riseSpeed = 0.015 + Math.random() * 0.01;
+    cloud.userData.riseSpeed = 0.025 + Math.random() * 0.015;
     cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
 
     consultingScene.add(cloud);
@@ -127,7 +127,7 @@ function animateClouds() {
 // Stop looping after 4 seconds - clouds will drift away
 setTimeout(() => {
   shouldLoop = false;
-}, 4000);
+}, 3000);
 
 
   animateClouds();
@@ -220,7 +220,8 @@ if (form && questionInput) {
 
     // Ensure clouds have been visible for at least 6 seconds
     const elapsed = Date.now() - cloudsStartTime;
-    const minDisplayTime = 8000; // 8 seconds - gives clouds time to drift away    const remainingTime = Math.max(0, minDisplayTime - elapsed);
+    const minDisplayTime = 2000; // 8 seconds - gives clouds time to drift away
+    const remainingTime = Math.max(0, minDisplayTime - elapsed);
     console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
 
     // Store fortune data BEFORE timing delays
