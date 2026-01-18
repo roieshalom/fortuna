@@ -126,7 +126,7 @@ canvas {
 /* === APP CONTAINER === */
 .app {
   position: fixed;
-  top: 200px;
+  top: 180px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 20;
@@ -135,6 +135,19 @@ canvas {
   width: 85%;
   max-width: 450px;
   padding: 20px;
+}
+
+/* Override for reveal page */
+.app.reveal-page {
+  top: 40%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: none;
+  opacity: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px; /* Add padding so card doesn't touch edges */
 }
 
 .app.visible {
@@ -306,56 +319,54 @@ label {
 
 /* === FORTUNE REVEAL VIEW === */
 .fortune-view {
-  display: none; /* Hidden by default */
+  display: none;
   width: 100%;
-  max-width: 550px;
+  max-width: 700px;
   padding: 20px;
-  margin-top: 20px; /* Add gap from top */
+  margin: 20px auto 0 auto;
   opacity: 0;
   transform: scale(0.95);
   transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
-/* Override app positioning when fortune is showing */
-.app:has(.fortune-view.visible) {
-  top: 60px; /* Much higher when showing fortune */
-}
-
 .fortune-view.visible {
-  display: block;
-  opacity: 1;
-  transform: scale(1);
+  display: block !important;
+  opacity: 1 !important;
+  transform: scale(1) !important;
 }
 
 .fortune-card {
   position: relative;
   background: url('/server/assets/fortune-card.png');
-  background-size: contain;  /* Changed from 'cover' to show full image */
+  background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  padding: 80px 50px;  /* Adjusted padding to fit text better */
-  min-height: 400px;  /* Ensure card has enough height */
+  padding: 120px 80px;
+  min-height: 400px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto; /* ADD THIS */
 }
-
 
 .fortune-text {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 400;
-  line-height: 1.8;
-  color: #3a2f23;
+  line-height: 1.5;
+  color: #2e241a;
   text-align: center;
-  min-height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 20px;
+  display: block;
+  padding: 20px;
   font-style: italic;
   letter-spacing: 0.3px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  /* hyphens removed - words wrap naturally to next line */
 }
+
 
 .fortune-message {
   margin-top: 35px;
@@ -370,8 +381,21 @@ label {
   opacity: 0.85;
 }
 
-/* === MOBILE ADJUSTMENTS === */
-@media (max-width: 640px) {
+/* === DESKTOP ADJUSTMENTS === */
+@media (min-width: 611px) {
+  .fortune-card {
+    padding: 140px 120px;
+  }
+  
+  .fortune-text {
+    font-size: 1.3rem;
+    max-width: 450px;
+    margin: 0 auto;
+  }
+}
+
+/* === MOBILE & TABLET ADJUSTMENTS === */
+@media (max-width: 610px) {
   @keyframes title-slide-up {
     0% {
       top: 50%;
@@ -385,7 +409,11 @@ label {
     }
   }
 
-  /* Fortune card expands and adjusts on mobile */
+  .app {
+    top: 180px;
+  }
+
+  /* Fortune card for all smaller screens */
   .fortune-view {
     max-width: 95%;
     padding: 10px;
@@ -393,7 +421,7 @@ label {
   }
 
   .fortune-card {
-    padding: 60px 25px;
+    padding: 100px 80px; /* Safe padding for 320-640px range */
   }
 
   .fortune-text {
@@ -401,7 +429,6 @@ label {
     padding: 0 15px;
   }
 }
-
 
 /* === NEBULA BACKGROUND DEMO PAGE === */
 body.nebula-demo {

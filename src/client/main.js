@@ -171,9 +171,6 @@ async function fetchFortune(question) {
 }
 
 if (form && questionInput) {
-  const fortuneView = document.getElementById("fortune-view");
-  const fortuneText = document.getElementById("fortune-text");
-
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -195,7 +192,7 @@ if (form && questionInput) {
       if (appInner) {
         appInner.classList.add("app-consulting");
       }
-    }, 2400); // Wait before dissolving UI
+    }, 2400);
 
     let fortune;
     try {
@@ -212,34 +209,14 @@ if (form && questionInput) {
 
     console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
 
+    // Store fortune data BEFORE timing delays
+    sessionStorage.setItem('fortuneText', fortune);
+    sessionStorage.setItem('userQuestion', question);
+
     setTimeout(() => {
-      // SWAP VIEWS: Hide input, show fortune
-      if (appInner) {
-        appInner.style.display = "none";
-      }
-      if (fortuneView && fortuneText) {
-        fortuneText.textContent = fortune;
-        fortuneView.style.display = "block";
-        // Trigger animation after a frame
-        setTimeout(() => {
-          fortuneView.classList.add("visible");
-          
-          // Hide the page logo when fortune appears
-          const logo = document.getElementById("splash-title");
-          if (logo) {
-            logo.style.transition = "opacity 0.6s ease";
-            logo.style.opacity = "0";
-          }
-        }, 50);
-      }
-
-      // End consulting state
-      if (consultingOverlay) {
-        consultingOverlay.classList.remove("visible");
-      }
-
-      // Clean up clouds after fade
-      setTimeout(stopConsultingClouds, 600);
+      // Navigate while clouds are still covering
+      window.location.href = './reveal.html';
     }, remainingTime);
+
   });
 }
