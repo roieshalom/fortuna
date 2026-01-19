@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" sizes="512x512" href="./android-chrome-512x512.png">
   <link rel="manifest" href="./manifest.json">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="description" content="Consult the cosmic nebula and receive mystical fortunes from Esmeralda">
   <meta property="og:title" content="Ask Esmeralda">
   <meta property="og:description" content="Consult the cosmic nebula and receive mystical fortunes">
@@ -26,7 +26,7 @@
   <body>
 
     <!-- Nebula background canvas -->
-    <canvas id="bg-canvas"></canvas>
+    anvas id="bg-canvas"></canvas>
 
     <!-- Splash overlay -->
     <div class="splash-overlay" id="splash">
@@ -57,23 +57,22 @@
     </section>
 
     <!-- FORTUNE REVEAL VIEW (hidden by default) -->
-<section class="fortune-view" id="fortune-view">
-  <div class="fortune-card">
-    <div class="fortune-text" id="fortune-text">
-      <!-- Fortune appears here -->
-    </div>
-  </div>
-  <p class="fortune-message">
-    Esmeralda has spoken. <br> Return when the moon rises anew.
-  </p>
-</section>
+    <section class="fortune-view" id="fortune-view">
+      <div class="fortune-card">
+        <div class="fortune-text" id="fortune-text">
+          <!-- Fortune appears here -->
+        </div>
+      </div>
+      <p class="fortune-message">
+        Esmeralda has spoken. <br> Return when the moon rises anew.
+      </p>
+    </section>
 
   </main>
 
-
   <!-- Consulting overlay -->
   <div class="consulting-overlay" id="consulting-overlay" aria-hidden="true">
-      <canvas id="consulting-canvas" class="consulting-smoke"></canvas>
+      anvas id="consulting-canvas" class="consulting-smoke"></canvas>
       <div class="consulting-loader">
         <div class="loader-orbit">
           <span class="loader-dot"></span>
@@ -82,8 +81,6 @@
         </div>
       </div>
     </div>
-
-
 
     <!-- Nebula background script -->
     <script type="importmap">
@@ -99,13 +96,25 @@
 
       const canvas = document.getElementById("bg-canvas");
       const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      
+      // Fix for mobile viewport - force full coverage
+      function updateRendererSize() {
+        const width = Math.max(window.innerWidth, document.documentElement.clientWidth);
+        const height = Math.max(window.innerHeight, document.documentElement.clientHeight);
+        renderer.setSize(width, height, false);
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+        canvas.width = width * Math.min(window.devicePixelRatio, 2);
+        canvas.height = height * Math.min(window.devicePixelRatio, 2);
+      }
+      
+      updateRendererSize();
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-      renderer.setClearColor(0x0D47A1, 1);  // BRIGHT BLUE - was 0x050816
+      renderer.setClearColor(0x0D47A1, 1);
 
       const scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x3030ff, 0.005);  // Almost no fog - was 0.02
+      scene.fog = new THREE.FogExp2(0x3030ff, 0.005);
 
       const camera = new THREE.PerspectiveCamera(
         45,
@@ -117,18 +126,17 @@
       camera.lookAt(0, 0, 0);
 
       // SUPER BRIGHT LIGHTS
-      const purpleLight = new THREE.PointLight(0xd946ff, 10, 150);  // was 2.4, 80
+      const purpleLight = new THREE.PointLight(0xd946ff, 10, 150);
       purpleLight.position.set(-2.5, 2, 8);
 
-      const cyanLight = new THREE.PointLight(0x5ee7ff, 10, 150);  // was 2.0, 80
+      const cyanLight = new THREE.PointLight(0x5ee7ff, 10, 150);
       cyanLight.position.set(3, -1.5, 7);
 
-      const pinkLight = new THREE.PointLight(0xff6ad5, 10, 150);  // was 1.8, 70
+      const pinkLight = new THREE.PointLight(0xff6ad5, 10, 150);
       pinkLight.position.set(0, -3, 6);
 
       scene.add(purpleLight, cyanLight, pinkLight);
-      scene.add(new THREE.AmbientLight(0x1f2937, 1.1));  // BRIGHT WHITE - was 0x1f2937, 1.1
-
+      scene.add(new THREE.AmbientLight(0x1f2937, 1.1));
 
       const loader = new THREE.TextureLoader();
       const smokeTexture = loader.load("/server/assets/smoke.png");
@@ -173,10 +181,8 @@
       }
 
       function onResize() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        renderer.setSize(w, h);
-        camera.aspect = w / h;
+        updateRendererSize();
+        camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
       }
       window.addEventListener("resize", onResize);
@@ -261,7 +267,7 @@
         // Show the app (input box appears) a bit later
         setTimeout(() => {
           appRoot.classList.add("visible");
-        }, 600); // <- adjust this delay (ms) to taste
+        }, 600);
 
         // Fade out the splash overlay background (title is now independent)
         splash.style.transition = "opacity 0.8s ease";
