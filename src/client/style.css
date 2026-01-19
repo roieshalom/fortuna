@@ -35,6 +35,23 @@ canvas {
   z-index: 0;
 }
 
+.splash-title {
+  position: fixed;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.splash-title img {
+  width: 25vw;
+  min-width: 200px;
+  max-width: 300px;
+  height: auto;
+  display: block;
+}
+
 /* === APP CONTAINER === */
 .app {
   position: fixed;
@@ -42,7 +59,7 @@ canvas {
   left: 50%;
   transform: translateX(-50%);
   z-index: 20;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.8s ease;
   width: 85%;
   max-width: 450px;
