@@ -37,17 +37,18 @@ canvas {
 
 .splash-title {
   position: fixed;
-  top: 50px;
+  top: 100px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
   pointer-events: none;
 }
 
+
 .splash-title img {
-  width: 25vw;
+  width: 45vw;
   min-width: 200px;
-  max-width: 300px;
+  max-width: 500px;
   height: auto;
   display: block;
 }

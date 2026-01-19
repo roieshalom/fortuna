@@ -1,9 +1,7 @@
 // src/client/main.js
 import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
-
 console.log("main.js loaded");
-
 
 const form = document.getElementById("fortune-form");
 const questionInput = document.getElementById("question");
@@ -11,13 +9,11 @@ const appInner = document.getElementById("app-inner");
 const consultingOverlay = document.getElementById("consulting-overlay");
 const consultingCanvas = document.getElementById("consulting-canvas");
 
-
 let consultingScene = null;
 let consultingRenderer = null;
 let consultingClouds = [];
 let consultingAnimationId = null;
 let shouldLoop = true; // Track if clouds should loop back - MOVED HERE
-
 
 // Create the consulting cloud scene
 function startConsultingClouds() {
@@ -31,7 +27,6 @@ function startConsultingClouds() {
   
   console.log("Creating consulting clouds...");
 
-
   // Set up renderer
   consultingRenderer = new THREE.WebGLRenderer({
     canvas: consultingCanvas,
@@ -42,9 +37,7 @@ function startConsultingClouds() {
   consultingRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   consultingRenderer.setClearColor(0x000000, 0); // Transparent
 
-
   consultingScene = new THREE.Scene();
-
 
   const camera = new THREE.PerspectiveCamera(
     45,
@@ -55,38 +48,30 @@ function startConsultingClouds() {
   camera.position.set(0, -1.5, 2); // Lower, looking up
   camera.lookAt(0, 0, 0);
 
-
   // Dramatic lighting
   const purpleLight = new THREE.PointLight(0xd946ff, 8, 120);
   purpleLight.position.set(-2, 1, 5);
 
-
   const cyanLight = new THREE.PointLight(0x5ee7ff, 8, 120);
   cyanLight.position.set(2, -1, 5);
-
 
   const pinkLight = new THREE.PointLight(0xff6ad5, 6, 100);
   pinkLight.position.set(0, -2, 4);
 
-
   consultingScene.add(purpleLight, cyanLight, pinkLight);
   consultingScene.add(new THREE.AmbientLight(0x1f2937, 0.8));
-
 
   // Load smoke texture
   const loader = new THREE.TextureLoader();
   const smokeTexture = loader.load("/server/assets/smoke.png");
 
-
   const cloudGeo = new THREE.PlaneGeometry(7, 7);
   consultingClouds = [];
-
 
   // Spawn 40 clouds rising from below
   for (let i = 0; i < 40; i++) {
     const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
     const tint = tintColors[i % tintColors.length];
-
 
     const material = new THREE.MeshLambertMaterial({
       map: smokeTexture,
@@ -97,9 +82,7 @@ function startConsultingClouds() {
       side: THREE.DoubleSide
     });
 
-
     const cloud = new THREE.Mesh(cloudGeo, material);
-
 
     // Position clouds below the viewport, spread out
     cloud.position.set(
@@ -108,26 +91,20 @@ function startConsultingClouds() {
       -1 - Math.random() * 2
     );
 
-
     cloud.rotation.z = Math.random() * Math.PI * 2;
-
 
     // Store upward velocity for animation
     cloud.userData.riseSpeed = 0.025 + Math.random() * 0.015;
     cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
 
-
     consultingScene.add(cloud);
     consultingClouds.push(cloud);
   }
 
-
   console.log("Created", consultingClouds.length, "clouds");
-
 
   // Animation loop
   let startTime = Date.now();
-
 
   function animateClouds() {
     consultingAnimationId = requestAnimationFrame(animateClouds);
@@ -151,13 +128,11 @@ function startConsultingClouds() {
       loopProbability = 0;
     }
 
-
     consultingClouds.forEach((cloud) => {
       // Rise upward
       cloud.position.y += cloud.userData.riseSpeed;
       // Rotate slowly
       cloud.rotation.z += cloud.userData.rotSpeed;
-
 
       // Loop back based on probability
       if (cloud.position.y > 6 && Math.random() < loopProbability) {
@@ -165,14 +140,11 @@ function startConsultingClouds() {
       }
     });
 
-
     consultingRenderer.render(consultingScene, camera);
   }
 
-
   animateClouds();
 }
-
 
 // Clean up the consulting scene
 function stopConsultingClouds() {
@@ -181,12 +153,10 @@ function stopConsultingClouds() {
     consultingAnimationId = null;
   }
 
-
   if (consultingRenderer) {
     consultingRenderer.dispose();
     consultingRenderer = null;
   }
-
 
   consultingClouds.forEach((cloud) => {
     if (cloud.geometry) cloud.geometry.dispose();
@@ -196,11 +166,9 @@ function stopConsultingClouds() {
     }
   });
 
-
   consultingClouds = [];
   consultingScene = null;
 }
-
 
 async function fetchFortune(question) {
   const res = await fetch("/api/fortune", {
@@ -209,30 +177,23 @@ async function fetchFortune(question) {
     body: JSON.stringify({ question })
   });
 
-
   if (!res.ok) {
     throw new Error("Network response was not ok");
   }
-
 
   const data = await res.json();
   return data.fortune || "The nebula murmurs, but softly.";
 }
 
-
-
 if (form && questionInput) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-
     const question = questionInput.value.trim();
     if (!question) return;
 
-
     // Track when clouds started
     const cloudsStartTime = Date.now();
-
 
     // Start consulting overlay immediately
     if (consultingOverlay) {
@@ -240,7 +201,6 @@ if (form && questionInput) {
       console.log("Overlay visible, about to start clouds");
       setTimeout(startConsultingClouds, 100);
     }
-
 
     // DELAY the UI dissolve so clouds rise first
     setTimeout(() => {
@@ -256,7 +216,6 @@ if (form && questionInput) {
       }
     }, 2200);
 
-
     let fortune;
     try {
       fortune = await fetchFortune(question);
@@ -265,15 +224,13 @@ if (form && questionInput) {
       fortune = "The nebula is silent. Try again.";
     }
 
-
     // Show fortune after 2 seconds
     const elapsed = Date.now() - cloudsStartTime;
     const minDisplayTime = 4000; // 4 seconds
     const remainingTime = Math.max(0, minDisplayTime - elapsed);
     console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
 
-
-        setTimeout(() => {
+    setTimeout(() => {
       // SWAP VIEWS: Hide input, show fortune (no navigation!)
       if (appInner) {
         appInner.style.display = "none";
@@ -285,7 +242,6 @@ if (form && questionInput) {
       if (fortuneView && fortuneText) {
         fortuneText.textContent = fortune;
         fortuneView.style.display = "block";
-
 
         // Stop generating new clouds immediately
         shouldLoop = false;
@@ -301,7 +257,6 @@ if (form && questionInput) {
           fortuneView.classList.add("visible");
         }, 50);
       }
-
 
       // Let clouds naturally exit, then clean up
       if (consultingOverlay) {
@@ -319,9 +274,18 @@ if (form && questionInput) {
         }, 8000); // Let clouds exit for 8 seconds
       }
 
-
     }, remainingTime);
-
 
   });
 }
+
+// Keep logo centered on window resize
+window.addEventListener("resize", () => {
+  const logo = document.getElementById("splash-title");
+  if (logo) {
+    // Clear any inline styles that might have been set
+    logo.style.top = "";
+    logo.style.left = "";
+    logo.style.transform = "";
+  }
+});
