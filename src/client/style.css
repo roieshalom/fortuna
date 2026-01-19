@@ -348,7 +348,7 @@ label {
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  padding: 22% 18%; /* Percentage scales with card width */
+  padding: 25% 15% 18% 15%; /* More balanced: top, right, bottom, left */
   min-height: 400px;
   display: flex;
   flex-direction: column;
@@ -389,7 +389,7 @@ label {
 /* === TABLET & DESKTOP ADJUSTMENTS === */
 @media (min-width: 611px) {
   .fortune-card {
-    padding: 22% 22%;
+    padding: 25% 15% 18% 15%; /* Match the base padding */
   }
 }
 
