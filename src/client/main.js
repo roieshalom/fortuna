@@ -246,17 +246,18 @@ if (form && questionInput) {
         }, 50);
       }
 
-        // Stop generating new clouds - let existing ones fly off naturally
-        if (consultingOverlay) {
-          // Stop the cloud loop immediately (no new clouds spawn)
-          // The existing clouds will continue rising and exit naturally
-          
-          // Clean up after clouds have had time to fly off screen
-          setTimeout(() => {
-            consultingOverlay.classList.remove("visible");
-            stopConsultingClouds();
-          }, 4000); // Give clouds 4 seconds to naturally exit upward
-        }
+      // Stop generating new clouds - let existing ones fly off naturally
+      if (consultingOverlay) {
+        // Remove the CSS opacity transition so clouds don't fade
+        consultingOverlay.style.transition = "none";
+        
+        // Clean up after clouds have had time to fly off screen
+        setTimeout(() => {
+          consultingOverlay.classList.remove("visible");
+          consultingOverlay.style.opacity = "0"; // Instant hide after clouds exit
+          stopConsultingClouds();
+        }, 6000); // 6 seconds - enough time for clouds to exit on all screens
+      }
 
     }, remainingTime);
 
