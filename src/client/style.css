@@ -362,16 +362,14 @@ label {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.2rem;
   font-weight: 400;
-  line-height: 1.6;
   color: #2e241a;
   text-align: center;
   display: block;
   padding: 0;
   font-style: italic;
-  letter-spacing: 0.3px;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  max-width: 90%; /* Constrain text to 90% of available space */
+  max-width: 100%; /* Constrain text to 90% of available space */
   margin: 0 auto;
 }
 
