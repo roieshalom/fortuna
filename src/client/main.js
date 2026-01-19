@@ -223,7 +223,7 @@ if (form && questionInput) {
     const remainingTime = Math.max(0, minDisplayTime - elapsed);
     console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
 
-    setTimeout(() => {
+        setTimeout(() => {
       // SWAP VIEWS: Hide input, show fortune (no navigation!)
       if (appInner) {
         appInner.style.display = "none";
@@ -235,6 +235,12 @@ if (form && questionInput) {
       if (fortuneView && fortuneText) {
         fortuneText.textContent = fortune;
         fortuneView.style.display = "block";
+        
+        // Move app container to top when fortune shows (removes logo space)
+        const appRoot = document.getElementById("app-root");
+        if (appRoot) {
+          appRoot.style.top = "0";
+        }
         
         // Trigger fade-in animation after a moment
         setTimeout(() => {
