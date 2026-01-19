@@ -13,6 +13,7 @@ let consultingScene = null;
 let consultingRenderer = null;
 let consultingClouds = [];
 let consultingAnimationId = null;
+let shouldLoop = true; // Track if clouds should loop back - MOVED HERE
 
 // Create the consulting cloud scene
 function startConsultingClouds() {
@@ -157,12 +158,6 @@ function stopConsultingClouds() {
 }
 
 async function fetchFortune(question) {
-  // MOCK: Skip API call while testing animation
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate short network delay
-  return "The stars whisper of change on the horizon. Trust your instincts, seeker.";
-  
-  // REAL API CALL (commented out for now):
-  /*
   const res = await fetch("/api/fortune", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -175,8 +170,8 @@ async function fetchFortune(question) {
 
   const data = await res.json();
   return data.fortune || "The nebula murmurs, but softly.";
-  */
 }
+
 
 if (form && questionInput) {
   form.addEventListener("submit", async (e) => {
@@ -235,6 +230,9 @@ if (form && questionInput) {
       if (fortuneView && fortuneText) {
         fortuneText.textContent = fortune;
         fortuneView.style.display = "block";
+
+        // Stop generating new clouds immediately
+        shouldLoop = false;
         
         // Move app container to top when fortune shows (removes logo space)
         const appRoot = document.getElementById("app-root");
@@ -248,16 +246,18 @@ if (form && questionInput) {
         }, 50);
       }
 
-      // Fade out and clean up clouds after fortune appears
-      if (consultingOverlay) {
-        consultingOverlay.style.transition = "opacity 1.5s ease-out";
-        consultingOverlay.style.opacity = "0";
-        
-        setTimeout(() => {
-          consultingOverlay.classList.remove("visible");
-          stopConsultingClouds();
-        }, 1500);
-      }
+        // Stop generating new clouds - let existing ones fly off naturally
+        if (consultingOverlay) {
+          // Stop the cloud loop immediately (no new clouds spawn)
+          // The existing clouds will continue rising and exit naturally
+          
+          // Clean up after clouds have had time to fly off screen
+          setTimeout(() => {
+            consultingOverlay.classList.remove("visible");
+            stopConsultingClouds();
+          }, 4000); // Give clouds 4 seconds to naturally exit upward
+        }
+
     }, remainingTime);
 
   });
