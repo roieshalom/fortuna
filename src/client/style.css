@@ -48,14 +48,17 @@ canvas {
   z-index: 10;
   width: 85%;
   max-width: 450px;
+  opacity: 0; /* ← ADD THIS - starts hidden */
+
 }
 
 .splash-title {
-  position: relative; /* Changed from fixed */
+  position: relative;
   pointer-events: none;
   width: 100%;
   display: flex;
   justify-content: center;
+  opacity: 0; /* ← Add this - starts hidden */
 }
 
 .splash-title img {

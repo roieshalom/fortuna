@@ -170,6 +170,119 @@ function stopConsultingClouds() {
   consultingScene = null;
 }
 
+// Intro clouds - cover screen on load, then exit
+function startIntroClouds() {
+  console.log("Starting intro clouds...");
+  
+  if (!consultingCanvas) {
+    console.error("Canvas not found!");
+    return;
+  }
+
+  // Set up renderer
+  consultingRenderer = new THREE.WebGLRenderer({
+    canvas: consultingCanvas,
+    antialias: true,
+    alpha: true
+  });
+  consultingRenderer.setSize(window.innerWidth, window.innerHeight);
+  consultingRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  consultingRenderer.setClearColor(0x000000, 0);
+
+  consultingScene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(
+    45,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    100
+  );
+  camera.position.set(0, -1.5, 2);
+  camera.lookAt(0, 0, 0);
+
+  // Dramatic lighting
+  const purpleLight = new THREE.PointLight(0xd946ff, 8, 120);
+  purpleLight.position.set(-2, 1, 5);
+
+  const cyanLight = new THREE.PointLight(0x5ee7ff, 8, 120);
+  cyanLight.position.set(2, -1, 5);
+
+  const pinkLight = new THREE.PointLight(0xff6ad5, 6, 100);
+  pinkLight.position.set(0, -2, 4);
+
+  consultingScene.add(purpleLight, cyanLight, pinkLight);
+  consultingScene.add(new THREE.AmbientLight(0x1f2937, 0.8));
+
+  // Load smoke texture
+  const loader = new THREE.TextureLoader();
+  const smokeTexture = loader.load("/server/assets/smoke.png");
+
+  const cloudGeo = new THREE.PlaneGeometry(7, 7);
+  consultingClouds = [];
+
+  // Spawn 40 clouds ALREADY COVERING THE SCREEN (not below)
+  for (let i = 0; i < 40; i++) {
+    const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
+    const tint = tintColors[i % tintColors.length];
+
+    const material = new THREE.MeshLambertMaterial({
+      map: smokeTexture,
+      color: tint,
+      transparent: true,
+      opacity: 1,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+
+    const cloud = new THREE.Mesh(cloudGeo, material);
+
+    // Position clouds ACROSS the viewport (not below)
+    cloud.position.set(
+      (Math.random() - 0.5) * 8,
+      (Math.random() - 0.5) * 6, // Spread across Y axis (covers screen)
+      -1 - Math.random() * 2
+    );
+
+    cloud.rotation.z = Math.random() * Math.PI * 2;
+
+    // Store upward velocity for animation
+    cloud.userData.riseSpeed = 0.025 + Math.random() * 0.015;
+    cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
+
+    consultingScene.add(cloud);
+    consultingClouds.push(cloud);
+  }
+
+  console.log("Created", consultingClouds.length, "intro clouds");
+
+  // Animation loop
+  let startTime = Date.now();
+
+  function animateIntroClouds() {
+    consultingAnimationId = requestAnimationFrame(animateIntroClouds);
+    
+    const elapsed = (Date.now() - startTime) / 1000;
+
+    consultingClouds.forEach((cloud) => {
+      // Rise upward continuously (no looping back)
+      cloud.position.y += cloud.userData.riseSpeed;
+      cloud.rotation.z += cloud.userData.rotSpeed;
+    });
+
+    consultingRenderer.render(consultingScene, camera);
+  }
+
+  animateIntroClouds();
+
+  // After 3 seconds total (1s wait + 2s to clear), clean up
+  setTimeout(() => {
+    stopConsultingClouds();
+    if (consultingOverlay) {
+      consultingOverlay.classList.remove("visible");
+    }
+  }, 3000);
+}
+
 async function fetchFortune(question) {
   const res = await fetch("/api/fortune", {
     method: "POST",
@@ -288,4 +401,27 @@ window.addEventListener("resize", () => {
     logo.style.left = "";
     logo.style.transform = "";
   }
+});
+
+// Start intro clouds immediately on page load
+window.addEventListener("DOMContentLoaded", () => {
+  if (consultingOverlay) {
+    consultingOverlay.classList.add("visible");
+    startIntroClouds();
+  }
+  
+  // Fade in logo + input after 1 second (as clouds start to clear)
+  setTimeout(() => {
+    const logo = document.getElementById("splash-title");
+    if (logo) {
+      logo.style.transition = "opacity 1s ease";
+      logo.style.opacity = "1";
+    }
+    
+    const mainContainer = document.querySelector(".main-container");
+    if (mainContainer) {
+      mainContainer.style.transition = "opacity 1s ease";
+      mainContainer.style.opacity = "1";
+    }
+  }, 1000);
 });
