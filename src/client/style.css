@@ -35,43 +35,51 @@ canvas {
   z-index: 0;
 }
 
-.splash-title {
+/* === MAIN CONTAINER (logo + input together) === */
+.main-container {
   position: fixed;
-  top: 100px;
+  top: 35%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px; /* Distance between logo and input */
   z-index: 10;
-  pointer-events: none;
+  width: 85%;
+  max-width: 450px;
 }
 
+.splash-title {
+  position: relative; /* Changed from fixed */
+  pointer-events: none;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
 
 .splash-title img {
-  width: 45vw;
-  min-width: 200px;
-  max-width: 500px;
+  width: 100%;
+  max-width: 400px; /* Adjust logo max size */
   height: auto;
   display: block;
 }
 
 /* === APP CONTAINER === */
 .app {
-  position: fixed;
-  top: 180px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
+  position: relative; /* Changed from fixed */
+  width: 100%;
   opacity: 1;
   transition: opacity 0.8s ease;
-  width: 85%;
-  max-width: 450px;
-  padding: 20px;
-  height: 100vh; /* Add this */
-  position: relative; /* Change from fixed to relative when fortune shows */
+  padding: 0;
+  z-index: 20;
 }
 
 /* Override for reveal page */
 .app.reveal-page {
+  position: fixed;
   top: 25%;
+  left: 50%;
   transform: translate(-50%, -50%);
   width: 100%;
   max-width: none;
@@ -79,7 +87,7 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px; /* Add padding so card doesn't touch edges */
+  padding: 40px 20px;
 }
 
 .app.visible {
@@ -256,7 +264,7 @@ label {
   padding: 20px;
   margin: 0 auto;
   position: fixed;
-  top: 80px; /* Very close to top */
+  top: -130px; /* ← Negative value to move card up */
   left: 50%;
   transform: translateX(-50%) scale(0.95);
   opacity: 0;
@@ -264,13 +272,11 @@ label {
   z-index: 25;
 }
 
-
 .fortune-view.visible {
   display: block !important;
   opacity: 1 !important;
   transform: translateX(-50%) scale(1) !important;
 }
-
 
 .fortune-card {
   position: relative;
@@ -278,7 +284,7 @@ label {
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  padding: 25% 15% 18% 15%; /* More balanced: top, right, bottom, left */
+  padding: 25% 15% 18% 15%;
   min-height: 400px;
   display: flex;
   flex-direction: column;
@@ -299,12 +305,12 @@ label {
   font-style: italic;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  max-width: 100%; /* Constrain text to 90% of available space */
+  max-width: 100%;
   margin: 0 auto;
 }
 
 .fortune-message {
-  margin-top: 35px;
+  margin-top: 55px; /* ← Increased from 35px (add ~40px to compensate) */
   font-family: 'Cinzel', serif;
   font-size: 0.75rem;
   font-weight: 400;
@@ -319,25 +325,38 @@ label {
 /* === TABLET & DESKTOP ADJUSTMENTS === */
 @media (min-width: 611px) {
   .fortune-card {
-    padding: 25% 15% 18% 15%; /* Match the base padding */
+    padding: 25% 15% 18% 15%;
+  }
+  
+  .main-container {
+    gap: 50px; /* More space on desktop */
+  }
+  
+  .splash-title img {
+    max-width: 350px; /* Smaller logo on desktop */
   }
 }
 
 /* === MOBILE ADJUSTMENTS === */
 @media (max-width: 610px) {
-  .app {
-    top: 180px;
+  .main-container {
+    gap: 30px; /* Less space on mobile */
+    width: 90%;
+  }
+  
+  .splash-title img {
+    max-width: 300px;
   }
   
   .app.reveal-page {
-    padding: 10px !important; /* Minimal padding */
+    padding: 10px !important;
   }
 
   .fortune-view {
     max-width: none !important;
     width: 100% !important;
     padding: 0 !important;
-    margin-top: 20px;
+    margin-top: 0px;
   }
   
   .fortune-card {

@@ -23,259 +23,178 @@
   <link rel="stylesheet" href="./style.css" />
 </head>
 
-  <body>
+<body>
+  <!-- Nebula background canvas -->
+  <canvas id="bg-canvas"></canvas>
 
-    <!-- Nebula background canvas -->
-    <canvas id="bg-canvas"></canvas>
-
-        <!-- Static logo at top -->
+  <!-- Main container holding logo + input together -->
+  <div class="main-container">
+    <!-- Static logo -->
     <div class="splash-title" id="splash-title">
       <img src="/server/assets/logo.png" alt="Ask Esmeralda" />
     </div>
 
+    <!-- Main app content -->
     <main class="app" id="app-root">
+      <!-- INPUT VIEW -->
+      <section class="panel app-inner" id="app-inner">
+        <form id="fortune-form">
+          <input
+            id="question"
+            name="question"
+            type="text"
+            placeholder="What do you seek?"
+            required
+          />
+          <button type="submit">Reveal Fortune</button>
+        </form>
+      </section>
 
-  <!-- Main app content -->
-  <main class="app" id="app-root">
-    <!-- INPUT VIEW -->
-    <section class="panel app-inner" id="app-inner">
-      <form id="fortune-form">
-        <input
-          id="question"
-          name="question"
-          type="text"
-          placeholder="What do you seek?"
-          required
-        />
-        <button type="submit">Reveal Fortune</button>
-      </form>
-    </section>
-
-    <!-- FORTUNE REVEAL VIEW (hidden by default) -->
-    <section class="fortune-view" id="fortune-view">
-      <div class="fortune-card">
-        <div class="fortune-text" id="fortune-text">
-          <!-- Fortune appears here -->
+      <!-- FORTUNE REVEAL VIEW (hidden by default) -->
+      <section class="fortune-view" id="fortune-view">
+        <div class="fortune-card">
+          <div class="fortune-text" id="fortune-text">
+            <!-- Fortune appears here -->
+          </div>
         </div>
-      </div>
-      <p class="fortune-message">
-        Esmeralda has spoken. <br> Return when the moon rises anew.
-      </p>
-    </section>
-
-  </main>
+        <p class="fortune-message">
+          Esmeralda has spoken. <br> Return when the moon rises anew.
+        </p>
+      </section>
+    </main>
+  </div>
 
   <!-- Consulting overlay -->
   <div class="consulting-overlay" id="consulting-overlay" aria-hidden="true">
-      <canvas id="consulting-canvas" class="consulting-smoke"></canvas>
-      <div class="consulting-loader">
-        <div class="loader-orbit">
-          <span class="loader-dot"></span>
-          <span class="loader-dot"></span>
-          <span class="loader-dot"></span>
-        </div>
+    <canvas id="consulting-canvas" class="consulting-smoke"></canvas>
+    <div class="consulting-loader">
+      <div class="loader-orbit">
+        <span class="loader-dot"></span>
+        <span class="loader-dot"></span>
+        <span class="loader-dot"></span>
       </div>
     </div>
+  </div>
 
-    <!-- Nebula background script -->
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://unpkg.com/three@0.158.0/build/three.module.js"
-        }
+  <!-- Nebula background script -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.158.0/build/three.module.js"
       }
-    </script>
+    }
+  </script>
 
-    <script type="module">
-      import * as THREE from "three";
+  <script type="module">
+    import * as THREE from "three";
 
-      const canvas = document.getElementById("bg-canvas");
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-      
-      // Fix for mobile viewport - force full coverage
-      function updateRendererSize() {
-        const width = Math.max(window.innerWidth, document.documentElement.clientWidth);
-        const height = Math.max(window.innerHeight, document.documentElement.clientHeight);
-        renderer.setSize(width, height, false);
-        canvas.style.width = '100vw';
-        canvas.style.height = '100vh';
-        canvas.width = width * Math.min(window.devicePixelRatio, 2);
-        canvas.height = height * Math.min(window.devicePixelRatio, 2);
+    const canvas = document.getElementById("bg-canvas");
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    
+    // Fix for mobile viewport - force full coverage
+    function updateRendererSize() {
+      const width = Math.max(window.innerWidth, document.documentElement.clientWidth);
+      const height = Math.max(window.innerHeight, document.documentElement.clientHeight);
+      renderer.setSize(width, height, false);
+      canvas.style.width = '100vw';
+      canvas.style.height = '100vh';
+      canvas.width = width * Math.min(window.devicePixelRatio, 2);
+      canvas.height = height * Math.min(window.devicePixelRatio, 2);
+    }
+    
+    updateRendererSize();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    renderer.setClearColor(0x0D47A1, 1);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x3030ff, 0.005);
+
+    const camera = new THREE.PerspectiveCamera(
+      45,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      100
+    );
+    camera.position.set(0, 0, 0.8);
+    camera.lookAt(0, 0, 0);
+
+    // SUPER BRIGHT LIGHTS
+    const purpleLight = new THREE.PointLight(0xd946ff, 10, 150);
+    purpleLight.position.set(-2.5, 2, 8);
+
+    const cyanLight = new THREE.PointLight(0x5ee7ff, 10, 150);
+    cyanLight.position.set(3, -1.5, 7);
+
+    const pinkLight = new THREE.PointLight(0xff6ad5, 10, 150);
+    pinkLight.position.set(0, -3, 6);
+
+    scene.add(purpleLight, cyanLight, pinkLight);
+    scene.add(new THREE.AmbientLight(0x1f2937, 1.1));
+
+    const loader = new THREE.TextureLoader();
+    const smokeTexture = loader.load("/server/assets/smoke.png");
+
+    const cloudGeo = new THREE.PlaneGeometry(4, 4);
+    const clouds = [];
+
+    for (let i = 0; i < 50; i++) {
+      const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
+      const tint = tintColors[i % tintColors.length];
+
+      const material = new THREE.MeshLambertMaterial({
+        map: smokeTexture,
+        color: tint,
+        transparent: true,
+        opacity: 0.95,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      });
+
+      const cloud = new THREE.Mesh(cloudGeo, material);
+
+      if (i < 20) {
+        const angle = (i / 20) * Math.PI * 2;
+        const radius = 4.3;
+        cloud.position.set(
+          Math.cos(angle) * radius,
+          Math.sin(angle) * radius,
+          -0.5
+        );
+      } else {
+        cloud.position.set(
+          (Math.random() - 0.5) * 4,
+          (Math.random() - 0.5) * 4,
+          -1 - Math.random() * 1.5
+        );
       }
-      
+
+      cloud.rotation.z = Math.random() * Math.PI * 2;
+      scene.add(cloud);
+      clouds.push(cloud);
+    }
+
+    function onResize() {
       updateRendererSize();
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener("resize", onResize);
 
-      renderer.setClearColor(0x0D47A1, 1);
+    function animate() {
+      requestAnimationFrame(animate);
 
-      const scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x3030ff, 0.005);
+      clouds.forEach((cloud, i) => {
+        const dir = i % 2 === 0 ? 1 : -1;
+        cloud.rotation.z += 0.001 * dir;
+      });
 
-      const camera = new THREE.PerspectiveCamera(
-        45,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        100
-      );
-      camera.position.set(0, 0, 0.8);
-      camera.lookAt(0, 0, 0);
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
 
-      // SUPER BRIGHT LIGHTS
-      const purpleLight = new THREE.PointLight(0xd946ff, 10, 150);
-      purpleLight.position.set(-2.5, 2, 8);
-
-      const cyanLight = new THREE.PointLight(0x5ee7ff, 10, 150);
-      cyanLight.position.set(3, -1.5, 7);
-
-      const pinkLight = new THREE.PointLight(0xff6ad5, 10, 150);
-      pinkLight.position.set(0, -3, 6);
-
-      scene.add(purpleLight, cyanLight, pinkLight);
-      scene.add(new THREE.AmbientLight(0x1f2937, 1.1));
-
-      const loader = new THREE.TextureLoader();
-      const smokeTexture = loader.load("/server/assets/smoke.png");
-
-      const cloudGeo = new THREE.PlaneGeometry(4, 4);
-      const clouds = [];
-
-      for (let i = 0; i < 50; i++) {
-        const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
-        const tint = tintColors[i % tintColors.length];
-
-        const material = new THREE.MeshLambertMaterial({
-          map: smokeTexture,
-          color: tint,
-          transparent: true,
-          opacity: 0.95,
-          depthWrite: false,
-          side: THREE.DoubleSide
-        });
-
-        const cloud = new THREE.Mesh(cloudGeo, material);
-
-        if (i < 20) {
-          const angle = (i / 20) * Math.PI * 2;
-          const radius = 4.3;
-          cloud.position.set(
-            Math.cos(angle) * radius,
-            Math.sin(angle) * radius,
-            -0.5
-          );
-        } else {
-          cloud.position.set(
-            (Math.random() - 0.5) * 4,
-            (Math.random() - 0.5) * 4,
-            -1 - Math.random() * 1.5
-          );
-        }
-
-        cloud.rotation.z = Math.random() * Math.PI * 2;
-        scene.add(cloud);
-        clouds.push(cloud);
-      }
-
-      function onResize() {
-        updateRendererSize();
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-      }
-      window.addEventListener("resize", onResize);
-
-      function animate() {
-        requestAnimationFrame(animate);
-
-        clouds.forEach((cloud, i) => {
-          const dir = i % 2 === 0 ? 1 : -1;
-          cloud.rotation.z += 0.001 * dir;
-        });
-
-        renderer.render(scene, camera);
-      }
-      animate();
-
-      // === SPLASH → APP TRANSITION ===
-      const splash = document.getElementById("splash");
-      const appRoot = document.getElementById("app-root");
-      const splashTitle = document.getElementById("splash-title");
-
-      // Title intro: 0.5s delay + 3s duration = 3.5s finish
-      // Wait 1000ms after splash finishes = 4.5s total
-      const splashFinishTime = 1300; // 0.5s delay + 3s animation
-      const transitionDelay = 1000; // 1000ms after splash finishes
-      const totalDelay = splashFinishTime + transitionDelay; // 4.5s
-
-      setTimeout(() => {
-        // Move title to body to keep it visible during transition
-        if (splashTitle) {
-          const rect = splashTitle.getBoundingClientRect();
-          const computedStyle = window.getComputedStyle(splashTitle);
-          
-          // Capture the center point of the title
-          const centerX = rect.left + rect.width / 2;
-          const centerY = rect.top + rect.height / 2;
-          
-          // Calculate target scale: final width should be 25% of viewport width
-          const currentWidth = rect.width;
-          const targetWidth = window.innerWidth * 0.25;
-          const targetScale = targetWidth / currentWidth;
-          
-          console.log("Moving title - center:", centerX, centerY, "scale:", targetScale);
-          
-          // Move to body to make it independent of splash overlay
-          document.body.appendChild(splashTitle);
-          
-          // Preserve current visual position - center it at its current location
-          splashTitle.style.position = "fixed";
-          splashTitle.style.top = centerY + "px";
-          splashTitle.style.left = centerX + "px";
-          splashTitle.style.transform = "translate(-50%, -50%) scale(1)";
-          splashTitle.style.fontSize = computedStyle.fontSize;
-          splashTitle.style.fontFamily = computedStyle.fontFamily;
-          splashTitle.style.color = computedStyle.color;
-          splashTitle.style.textShadow = computedStyle.textShadow;
-          splashTitle.style.zIndex = "10";
-          splashTitle.style.opacity = "1";
-          splashTitle.style.pointerEvents = "none";
-          splashTitle.style.display = "flex";
-          splashTitle.style.flexDirection = "column";
-          splashTitle.style.alignItems = "center";
-          splashTitle.style.gap = "0.05em";
-          
-          // Store initial position and target scale for animation
-          splashTitle.style.setProperty("--start-top", centerY + "px");
-          splashTitle.style.setProperty("--start-left", centerX + "px");
-          splashTitle.style.setProperty("--target-scale", targetScale);
-          
-          // Force reflow to ensure position is set
-          splashTitle.offsetHeight;
-        }
-        
-        // Trigger title animation
-        setTimeout(() => {
-          if (splashTitle) {
-            console.log("Adding to-top class to title");
-            splashTitle.classList.add("to-top");
-          }
-        }, 100);
-
-        // Show the app (input box appears) a bit later
-        setTimeout(() => {
-          appRoot.classList.add("visible");
-        }, 600);
-
-        // Fade out the splash overlay background (title is now independent)
-        splash.style.transition = "opacity 0.8s ease";
-        splash.style.opacity = "0";
-
-        // Hide splash overlay after fade completes
-        setTimeout(() => {
-          splash.style.display = "none";
-        }, 900);
-        }, totalDelay);
-    </script>
-
-    <!-- Your existing app JS -->
-    <script type="module" src="./main.js"></script>
-  </body>
+  <!-- Your existing app JS -->
+  <script type="module" src="./main.js"></script>
+</body>
 </html>
