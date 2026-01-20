@@ -371,3 +371,125 @@ label {
     font-size: 1.35rem;
   }
 }
+
+/* === ABOUT BUTTON === */
+.about-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: var(--accent-soft);
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 30;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-style: italic;  /* Makes it look nicer */
+  font-family: Georgia, serif;  /* Better serif "i" */
+  text-transform: none;  /* ← Add this */
+  opacity: 0;  /* ← Add this */
+}
+
+.about-btn:hover {
+  background: rgba(168, 85, 247, 0.3);
+  border-color: var(--accent);
+  transform: scale(1.1);
+}
+
+/* === ABOUT MODAL === */
+.about-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.about-modal.visible {
+  display: flex;
+  opacity: 1;
+}
+
+.about-content {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 0 40px rgba(168, 85, 247, 0.3);
+}
+
+.about-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.about-close:hover {
+  color: var(--accent);
+}
+
+.about-content h2 {
+  font-family: 'Rye', serif;
+  font-size: 2rem;
+  color: #f3d56b;
+  margin: 0 0 20px 0;
+  text-shadow: 0 0 10px rgba(243, 213, 107, 0.5);
+}
+
+.about-content p {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 0 0 30px 0;
+}
+
+.about-links {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.about-links a {
+  padding: 12px 24px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+  color: #020617;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.about-links a:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}

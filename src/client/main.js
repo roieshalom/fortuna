@@ -410,7 +410,7 @@ window.addEventListener("DOMContentLoaded", () => {
     startIntroClouds();
   }
   
-  // Fade in logo + input after 1 second (as clouds start to clear)
+  // Fade in logo + input + about button after 1 second (as clouds start to clear)
   setTimeout(() => {
     const logo = document.getElementById("splash-title");
     if (logo) {
@@ -423,5 +423,43 @@ window.addEventListener("DOMContentLoaded", () => {
       mainContainer.style.transition = "opacity 1s ease";
       mainContainer.style.opacity = "1";
     }
+    
+    const aboutBtn = document.getElementById("about-btn");
+    if (aboutBtn) {
+      aboutBtn.style.transition = "opacity 1s ease";
+      aboutBtn.style.opacity = "1";
+    }
   }, 1000);
 });
+
+
+// About modal functionality
+const aboutBtn = document.getElementById("about-btn");
+const aboutModal = document.getElementById("about-modal");
+const aboutClose = document.getElementById("about-close");
+
+if (aboutBtn && aboutModal && aboutClose) {
+  // Open modal
+  aboutBtn.addEventListener("click", () => {
+    aboutModal.classList.add("visible");
+  });
+
+  // Close modal on X button
+  aboutClose.addEventListener("click", () => {
+    aboutModal.classList.remove("visible");
+  });
+
+  // Close modal when clicking outside content
+  aboutModal.addEventListener("click", (e) => {
+    if (e.target === aboutModal) {
+      aboutModal.classList.remove("visible");
+    }
+  });
+
+  // Close modal on Escape key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && aboutModal.classList.contains("visible")) {
+      aboutModal.classList.remove("visible");
+    }
+  });
+}
