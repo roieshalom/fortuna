@@ -114,15 +114,15 @@ function startConsultingClouds() {
     // Calculate loop probability based on time (bell curve)
     let loopProbability = 1; // Default: all clouds loop
     
-    if (elapsed < 1.0) {
-      // Quick ramp up: 0 → 1 over first 1s
-      loopProbability = elapsed / 1.0;
-    } else if (elapsed < 3.0) {
-      // Peak: full density for 2 seconds
+    if (elapsed < 1.5) {
+      // Smoother ramp up: 0 → 1 over first 1.5s
+      loopProbability = elapsed / 1.5;
+    } else if (elapsed < 4.0) {
+      // Peak: full density for 2.5 seconds (1.5-4.0s)
       loopProbability = 1;
-    } else if (elapsed < 5.5) {
-      // Gradual taper off: 1 → 0 over 2.5s
-      loopProbability = 1 - ((elapsed - 3.0) / 2.5);
+    } else if (elapsed < 6.5) {
+      // Gradual taper off: 1 → 0 over 2.5s (4.0-6.5s)
+      loopProbability = 1 - ((elapsed - 4.0) / 2.5);
     } else {
       // All clouds exit naturally
       loopProbability = 0;
