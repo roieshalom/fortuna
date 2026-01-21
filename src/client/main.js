@@ -13,7 +13,7 @@ let consultingScene = null;
 let consultingRenderer = null;
 let consultingClouds = [];
 let consultingAnimationId = null;
-let shouldLoop = true; // Track if clouds should loop back - MOVED HERE
+let shouldLoop = true;
 
 // Create the consulting cloud scene
 function startConsultingClouds() {
@@ -35,7 +35,7 @@ function startConsultingClouds() {
   });
   consultingRenderer.setSize(window.innerWidth, window.innerHeight);
   consultingRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  consultingRenderer.setClearColor(0x000000, 0); // Transparent
+  consultingRenderer.setClearColor(0x000000, 0);
 
   consultingScene = new THREE.Scene();
 
@@ -45,7 +45,7 @@ function startConsultingClouds() {
     0.1,
     100
   );
-  camera.position.set(0, -1.5, 2); // Lower, looking up
+  camera.position.set(0, -1.5, 2);
   camera.lookAt(0, 0, 0);
 
   // Dramatic lighting
@@ -68,8 +68,8 @@ function startConsultingClouds() {
   const cloudGeo = new THREE.PlaneGeometry(7, 7);
   consultingClouds = [];
 
-  // Spawn 40 clouds rising from below
-  for (let i = 0; i < 40; i++) {
+  // Spawn 50 clouds (increased for better coverage)
+  for (let i = 0; i < 50; i++) {
     const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
     const tint = tintColors[i % tintColors.length];
 
@@ -84,10 +84,10 @@ function startConsultingClouds() {
 
     const cloud = new THREE.Mesh(cloudGeo, material);
 
-    // Position clouds below the viewport, spread out
+    // Position clouds below the viewport
     cloud.position.set(
       (Math.random() - 0.5) * 8,
-      -4 - Math.random() * 2, // Start lower
+      -4 - Math.random() * 2,
       -1 - Math.random() * 2
     );
 
@@ -109,32 +109,25 @@ function startConsultingClouds() {
   function animateClouds() {
     consultingAnimationId = requestAnimationFrame(animateClouds);
     
-    const elapsed = (Date.now() - startTime) / 1000; // Seconds elapsed
+    const elapsed = (Date.now() - startTime) / 1000;
     
-    // Calculate loop probability based on time (bell curve)
-    let loopProbability = 1; // Default: all clouds loop
+    // Extended peak to cover the 4s transition window
+    let loopProbability = 1;
     
-    if (elapsed < 1.5) {
-      // Smoother ramp up: 0 → 1 over first 1.5s
-      loopProbability = elapsed / 1.5;
-    } else if (elapsed < 4.0) {
-      // Peak: full density for 2.5 seconds (1.5-4.0s)
+    if (elapsed < 1.2) {
+      loopProbability = elapsed / 1.2;
+    } else if (elapsed < 4.5) {
       loopProbability = 1;
-    } else if (elapsed < 6.5) {
-      // Gradual taper off: 1 → 0 over 2.5s (4.0-6.5s)
-      loopProbability = 1 - ((elapsed - 4.0) / 2.5);
+    } else if (elapsed < 7.0) {
+      loopProbability = 1 - ((elapsed - 4.5) / 2.5);
     } else {
-      // All clouds exit naturally
       loopProbability = 0;
     }
 
     consultingClouds.forEach((cloud) => {
-      // Rise upward
       cloud.position.y += cloud.userData.riseSpeed;
-      // Rotate slowly
       cloud.rotation.z += cloud.userData.rotSpeed;
 
-      // Loop back based on probability
       if (cloud.position.y > 6 && Math.random() < loopProbability) {
         cloud.position.y = -4 - Math.random() * 2;
       }
@@ -179,7 +172,6 @@ function startIntroClouds() {
     return;
   }
 
-  // Set up renderer
   consultingRenderer = new THREE.WebGLRenderer({
     canvas: consultingCanvas,
     antialias: true,
@@ -200,7 +192,6 @@ function startIntroClouds() {
   camera.position.set(0, -1.5, 2);
   camera.lookAt(0, 0, 0);
 
-  // Dramatic lighting
   const purpleLight = new THREE.PointLight(0xd946ff, 8, 120);
   purpleLight.position.set(-2, 1, 5);
 
@@ -213,14 +204,12 @@ function startIntroClouds() {
   consultingScene.add(purpleLight, cyanLight, pinkLight);
   consultingScene.add(new THREE.AmbientLight(0x1f2937, 0.8));
 
-  // Load smoke texture
   const loader = new THREE.TextureLoader();
   const smokeTexture = loader.load("/server/assets/smoke.png");
 
   const cloudGeo = new THREE.PlaneGeometry(7, 7);
   consultingClouds = [];
 
-  // Spawn 40 clouds ALREADY COVERING THE SCREEN (not below)
   for (let i = 0; i < 40; i++) {
     const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
     const tint = tintColors[i % tintColors.length];
@@ -236,16 +225,14 @@ function startIntroClouds() {
 
     const cloud = new THREE.Mesh(cloudGeo, material);
 
-    // Position clouds ACROSS the viewport (not below)
     cloud.position.set(
       (Math.random() - 0.5) * 8,
-      (Math.random() - 0.5) * 6, // Spread across Y axis (covers screen)
+      (Math.random() - 0.5) * 6,
       -1 - Math.random() * 2
     );
 
     cloud.rotation.z = Math.random() * Math.PI * 2;
 
-    // Store upward velocity for animation
     cloud.userData.riseSpeed = 0.025 + Math.random() * 0.015;
     cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
 
@@ -255,7 +242,6 @@ function startIntroClouds() {
 
   console.log("Created", consultingClouds.length, "intro clouds");
 
-  // Animation loop
   let startTime = Date.now();
 
   function animateIntroClouds() {
@@ -264,7 +250,6 @@ function startIntroClouds() {
     const elapsed = (Date.now() - startTime) / 1000;
 
     consultingClouds.forEach((cloud) => {
-      // Rise upward continuously (no looping back)
       cloud.position.y += cloud.userData.riseSpeed;
       cloud.rotation.z += cloud.userData.rotSpeed;
     });
@@ -274,13 +259,19 @@ function startIntroClouds() {
 
   animateIntroClouds();
 
-  // After 3 seconds total (1s wait + 2s to clear), clean up
+  // Fade out smoothly before cleanup
   setTimeout(() => {
-    stopConsultingClouds();
     if (consultingOverlay) {
-      consultingOverlay.classList.remove("visible");
+      consultingOverlay.style.transition = "opacity 1s ease-out";
+      consultingOverlay.style.opacity = "0";
+      
+      setTimeout(() => {
+        consultingOverlay.classList.remove("visible");
+        consultingOverlay.style.opacity = "";
+        stopConsultingClouds();
+      }, 1000);
     }
-  }, 3000);
+  }, 2500);
 }
 
 async function fetchFortune(question) {
@@ -305,23 +296,21 @@ if (form && questionInput) {
     const question = questionInput.value.trim();
     if (!question) return;
 
-    // Track when clouds started
     const cloudsStartTime = Date.now();
 
-    // Start consulting overlay immediately
     if (consultingOverlay) {
       consultingOverlay.classList.add("visible");
+      consultingOverlay.style.opacity = "1";
+      consultingOverlay.style.transition = "none";
       console.log("Overlay visible, about to start clouds");
       setTimeout(startConsultingClouds, 100);
     }
 
-    // DELAY the UI dissolve so clouds rise first
     setTimeout(() => {
       if (appInner) {
         appInner.classList.add("app-consulting");
       }
       
-      // Fade out logo at the same time as input box
       const logo = document.getElementById("splash-title");
       if (logo) {
         logo.style.transition = "opacity 1.2s ease";
@@ -337,14 +326,12 @@ if (form && questionInput) {
       fortune = "The nebula is silent. Try again.";
     }
 
-    // Show fortune after 2 seconds
     const elapsed = Date.now() - cloudsStartTime;
-    const minDisplayTime = 4000; // 4 seconds
+    const minDisplayTime = 4000;
     const remainingTime = Math.max(0, minDisplayTime - elapsed);
     console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
 
     setTimeout(() => {
-      // SWAP VIEWS: Hide input, show fortune (no navigation!)
       if (appInner) {
         appInner.style.display = "none";
       }
@@ -356,35 +343,29 @@ if (form && questionInput) {
         fortuneText.textContent = fortune;
         fortuneView.style.display = "block";
 
-        // Stop generating new clouds immediately
         shouldLoop = false;
         
-        // Move app container to top when fortune shows (removes logo space)
         const appRoot = document.getElementById("app-root");
         if (appRoot) {
           appRoot.style.top = "0";
         }
         
-        // Trigger fade-in animation after a moment
         setTimeout(() => {
           fortuneView.classList.add("visible");
         }, 50);
       }
 
-      // Let clouds naturally exit, then clean up
       if (consultingOverlay) {
-        // Wait for all clouds to drift off screen naturally (8+ seconds)
         setTimeout(() => {
-          // Quick fade at the very end
-          consultingOverlay.style.transition = "opacity 0.8s ease-out";
+          consultingOverlay.style.transition = "opacity 1.5s ease-out";
           consultingOverlay.style.opacity = "0";
           
-          // Clean up after fade
           setTimeout(() => {
             consultingOverlay.classList.remove("visible");
+            consultingOverlay.style.opacity = "";
             stopConsultingClouds();
-          }, 800);
-        }, 8000); // Let clouds exit for 8 seconds
+          }, 1500);
+        }, 9000);
       }
 
     }, remainingTime);
@@ -392,25 +373,21 @@ if (form && questionInput) {
   });
 }
 
-// Keep logo centered on window resize
 window.addEventListener("resize", () => {
   const logo = document.getElementById("splash-title");
   if (logo) {
-    // Clear any inline styles that might have been set
     logo.style.top = "";
     logo.style.left = "";
     logo.style.transform = "";
   }
 });
 
-// Start intro clouds immediately on page load
 window.addEventListener("DOMContentLoaded", () => {
   if (consultingOverlay) {
     consultingOverlay.classList.add("visible");
     startIntroClouds();
   }
   
-  // Fade in logo + input + about button after 1 second (as clouds start to clear)
   setTimeout(() => {
     const logo = document.getElementById("splash-title");
     if (logo) {
@@ -432,31 +409,26 @@ window.addEventListener("DOMContentLoaded", () => {
   }, 1000);
 });
 
-
 // About modal functionality
 const aboutBtn = document.getElementById("about-btn");
 const aboutModal = document.getElementById("about-modal");
 const aboutClose = document.getElementById("about-close");
 
 if (aboutBtn && aboutModal && aboutClose) {
-  // Open modal
   aboutBtn.addEventListener("click", () => {
     aboutModal.classList.add("visible");
   });
 
-  // Close modal on X button
   aboutClose.addEventListener("click", () => {
     aboutModal.classList.remove("visible");
   });
 
-  // Close modal when clicking outside content
   aboutModal.addEventListener("click", (e) => {
     if (e.target === aboutModal) {
       aboutModal.classList.remove("visible");
     }
   });
 
-  // Close modal on Escape key
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && aboutModal.classList.contains("visible")) {
       aboutModal.classList.remove("visible");
