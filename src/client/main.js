@@ -107,34 +107,51 @@ function startConsultingClouds() {
   let startTime = Date.now();
 
   function animateClouds() {
-    consultingAnimationId = requestAnimationFrame(animateClouds);
-    
-    const elapsed = (Date.now() - startTime) / 1000;
-    
-    // Extended peak to cover the 4s transition window
-    let loopProbability = 1;
-    
-    if (elapsed < 1.2) {
-      loopProbability = elapsed / 1.2;
-    } else if (elapsed < 4.5) {
-      loopProbability = 1;
-    } else if (elapsed < 7.0) {
-      loopProbability = 1 - ((elapsed - 4.5) / 2.5);
-    } else {
-      loopProbability = 0;
-    }
-
-    consultingClouds.forEach((cloud) => {
-      cloud.position.y += cloud.userData.riseSpeed;
-      cloud.rotation.z += cloud.userData.rotSpeed;
-
-      if (cloud.position.y > 6 && Math.random() < loopProbability) {
-        cloud.position.y = -4 - Math.random() * 2;
-      }
-    });
-
-    consultingRenderer.render(consultingScene, camera);
+  consultingAnimationId = requestAnimationFrame(animateClouds);
+  
+  const elapsed = (Date.now() - startTime) / 1000;
+  
+  // Determine phase
+  let phase = 'peak'; // Default to peak
+  
+  if (elapsed < 1.0) {
+    phase = 'rampup';
+  } else if (elapsed < 5.5) {
+    phase = 'peak';
+  } else if (elapsed < 8.0) {
+    phase = 'taper';
+  } else {
+    phase = 'exit';
   }
+
+  consultingClouds.forEach((cloud) => {
+    cloud.position.y += cloud.userData.riseSpeed;
+    cloud.rotation.z += cloud.userData.rotSpeed;
+
+    // DETERMINISTIC looping based on phase
+    if (cloud.position.y > 6) {
+      if (phase === 'rampup') {
+        // Probabilistic ramp: 0 → 1
+        const loopChance = elapsed / 1.0;
+        if (Math.random() < loopChance) {
+          cloud.position.y = -4 - Math.random() * 2;
+        }
+      } else if (phase === 'peak') {
+        // GUARANTEED loop during peak - NO RANDOMNESS
+        cloud.position.y = -4 - Math.random() * 2;
+      } else if (phase === 'taper') {
+        // Probabilistic taper: 1 → 0
+        const loopChance = 1 - ((elapsed - 5.5) / 2.5);
+        if (Math.random() < loopChance) {
+          cloud.position.y = -4 - Math.random() * 2;
+        }
+      }
+      // phase === 'exit': don't loop, let clouds fly off
+    }
+  });
+
+  consultingRenderer.render(consultingScene, camera);
+}
 
   animateClouds();
 }
