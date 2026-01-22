@@ -69,7 +69,7 @@ function startConsultingClouds() {
   consultingClouds = [];
 
   // Spawn 50 clouds (increased for better coverage)
-  for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 100; i++) {
     const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
     const tint = tintColors[i % tintColors.length];
 
@@ -84,10 +84,10 @@ function startConsultingClouds() {
 
     const cloud = new THREE.Mesh(cloudGeo, material);
 
-    // Position clouds below the viewport
+    // FIXED: Distribute clouds across entire visible range (no synchronized gap)
     cloud.position.set(
       (Math.random() - 0.5) * 8,
-      -4 - Math.random() * 2,
+      -5 + Math.random() * 10, // Spread from -5 to +5 (entire cycle)
       -1 - Math.random() * 2
     );
 
@@ -100,6 +100,7 @@ function startConsultingClouds() {
     consultingScene.add(cloud);
     consultingClouds.push(cloud);
   }
+
 
   console.log("Created", consultingClouds.length, "clouds");
 
@@ -125,30 +126,44 @@ function startConsultingClouds() {
   }
 
   consultingClouds.forEach((cloud) => {
-    cloud.position.y += cloud.userData.riseSpeed;
-    cloud.rotation.z += cloud.userData.rotSpeed;
+  cloud.position.y += cloud.userData.riseSpeed;
+  cloud.rotation.z += cloud.userData.rotSpeed;
 
-    // DETERMINISTIC looping based on phase
-    if (cloud.position.y > 6) {
-      if (phase === 'rampup') {
-        // Probabilistic ramp: 0 → 1
-        const loopChance = elapsed / 1.0;
-        if (Math.random() < loopChance) {
-          cloud.position.y = -4 - Math.random() * 2;
-        }
-      } else if (phase === 'peak') {
-        // GUARANTEED loop during peak - NO RANDOMNESS
+  // FADE OUT clouds at top edge (prevents blink)
+  if (cloud.position.y > 4) {
+    cloud.material.opacity = Math.max(0, 1 - ((cloud.position.y - 4) / 2));
+  } 
+  // FADE IN clouds at bottom edge
+  else if (cloud.position.y < -3) {
+    cloud.material.opacity = Math.min(1, (cloud.position.y + 5) / 2);
+  }
+  // Full opacity in middle range
+  else {
+    cloud.material.opacity = 1;
+  }
+
+  // DETERMINISTIC looping based on phase
+  if (cloud.position.y > 6) {
+    if (phase === 'rampup') {
+      // Probabilistic ramp: 0 → 1
+      const loopChance = elapsed / 1.0;
+      if (Math.random() < loopChance) {
         cloud.position.y = -4 - Math.random() * 2;
-      } else if (phase === 'taper') {
-        // Probabilistic taper: 1 → 0
-        const loopChance = 1 - ((elapsed - 5.5) / 2.5);
-        if (Math.random() < loopChance) {
-          cloud.position.y = -4 - Math.random() * 2;
-        }
       }
-      // phase === 'exit': don't loop, let clouds fly off
+    } else if (phase === 'peak') {
+      // GUARANTEED loop during peak - NO RANDOMNESS
+      cloud.position.y = -4 - Math.random() * 2;
+    } else if (phase === 'taper') {
+      // Probabilistic taper: 1 → 0
+      const loopChance = 1 - ((elapsed - 5.5) / 2.5);
+      if (Math.random() < loopChance) {
+        cloud.position.y = -4 - Math.random() * 2;
+      }
     }
-  });
+    // phase === 'exit': don't loop, let clouds fly off
+  }
+});
+
 
   consultingRenderer.render(consultingScene, camera);
 }
