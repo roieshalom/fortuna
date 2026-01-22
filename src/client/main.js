@@ -84,13 +84,12 @@ function startConsultingClouds() {
 
     const cloud = new THREE.Mesh(cloudGeo, material);
 
-    // ALL clouds start BELOW viewport, rise up fully visible
+    // FIXED: Distribute clouds across entire visible range (no synchronized gap)
     cloud.position.set(
       (Math.random() - 0.5) * 8,
-      -6 - Math.random() * 3, // Start from -6 to -9 (all below screen)
+      -5 + Math.random() * 10, // Spread from -5 to +5 (entire cycle)
       -1 - Math.random() * 2
     );
-
 
     cloud.rotation.z = Math.random() * Math.PI * 2;
 
@@ -130,13 +129,18 @@ function startConsultingClouds() {
   cloud.position.y += cloud.userData.riseSpeed;
   cloud.rotation.z += cloud.userData.rotSpeed;
 
-  // FADE OUT clouds at top edge only (prevents blink when repositioning)
-if (cloud.position.y > 4) {
-  cloud.material.opacity = Math.max(0, 1 - ((cloud.position.y - 4) / 2));
-} else {
-  // Full opacity everywhere else (clouds rise fully visible from bottom)
-  cloud.material.opacity = 1;
-}
+  // FADE OUT clouds at top edge (prevents blink)
+  if (cloud.position.y > 4) {
+    cloud.material.opacity = Math.max(0, 1 - ((cloud.position.y - 4) / 2));
+  } 
+  // FADE IN clouds at bottom edge
+  else if (cloud.position.y < -3) {
+    cloud.material.opacity = Math.min(1, (cloud.position.y + 5) / 2);
+  }
+  // Full opacity in middle range
+  else {
+    cloud.material.opacity = 1;
+  }
 
   // DETERMINISTIC looping based on phase
   if (cloud.position.y > 6) {
