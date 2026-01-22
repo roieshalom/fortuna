@@ -265,6 +265,7 @@ label {
   width: 100%;
   max-width: 700px;
   padding: 20px;
+  padding-top: 20px;
   margin: 0 auto;
   position: fixed;
   top: -130px; /* ← Negative value to move card up */
@@ -358,8 +359,6 @@ label {
   .fortune-view {
     max-width: none !important;
     width: 100% !important;
-    padding: 0 !important;
-    margin-top: 0px;
   }
   
   .fortune-card {
