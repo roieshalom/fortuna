@@ -350,9 +350,9 @@ async function generateShareImage(fortuneText) {
   ctx.textAlign = 'center';
   ctx.fillText('What does your fate hold?', W / 2, ctaStartY + 58);
 
-  ctx.font = '26px "Cinzel", serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
-  ctx.fillText('askesmeralda.com', W / 2, ctaStartY + 58 + 64);
+  ctx.font = '34px "Cinzel", serif';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+  ctx.fillText('askesmeralda.com', W / 2, ctaStartY + 58 + 70);
 
   return canvas;
 }
