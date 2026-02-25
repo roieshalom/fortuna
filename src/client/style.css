@@ -313,12 +313,12 @@ label {
   font-family: 'Cinzel', serif;
   font-size: 0.75rem;
   font-weight: 400;
-  color: #6b5640;
+  color: #c9a87c;
   text-align: center;
   line-height: 1.6;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  opacity: 0.85;
+  opacity: 1;
 }
 
 /* === SHARE BUTTON === */
