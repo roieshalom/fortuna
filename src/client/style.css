@@ -309,7 +309,7 @@ label {
 }
 
 .fortune-message {
-  margin-top: 55px; /* ← Increased from 35px (add ~40px to compensate) */
+  margin-top: 20px;
   font-family: 'Cinzel', serif;
   font-size: 0.75rem;
   font-weight: 400;
