@@ -284,7 +284,7 @@ label {
 
 .fortune-card {
   position: relative;
-  background: url('/server/assets/fortune-card.png');
+  background: url('./assets/fortune-card.png');
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;

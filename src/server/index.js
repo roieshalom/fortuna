@@ -23,9 +23,6 @@ app.use(express.json());
 const clientPath = path.join(__dirname, "..", "client");
 app.use(express.static(clientPath));
 
-// Static assets for Three.js texture
-const assetsPath = path.join(__dirname, "assets");
-app.use("/server/assets", express.static(assetsPath));
 
 // OpenAI setup
 const openai = new OpenAI({

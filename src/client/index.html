@@ -47,7 +47,7 @@
   <div class="main-container">
     <!-- Static logo -->
     <div class="splash-title" id="splash-title">
-      <img src="/server/assets/logo.png" alt="Ask Esmeralda" />
+      <img src="./assets/logo.png" alt="Ask Esmeralda" />
     </div>
 
     <!-- Main app content -->
@@ -153,7 +153,7 @@
     scene.add(new THREE.AmbientLight(0x1f2937, 1.1));
 
     const loader = new THREE.TextureLoader();
-    const smokeTexture = loader.load("/server/assets/smoke.png");
+    const smokeTexture = loader.load("./assets/smoke.png");
 
     const cloudGeo = new THREE.PlaneGeometry(4, 4);
     const clouds = [];

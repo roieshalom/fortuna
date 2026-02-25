@@ -63,13 +63,13 @@ function startConsultingClouds() {
 
   // Load smoke texture
   const loader = new THREE.TextureLoader();
-  const smokeTexture = loader.load("/server/assets/smoke.png");
+  const smokeTexture = loader.load("./assets/smoke.png");
 
   const cloudGeo = new THREE.PlaneGeometry(7, 7);
   consultingClouds = [];
 
-  // Spawn 50 clouds (increased for better coverage)
-    for (let i = 0; i < 100; i++) {
+  // Spawn 100 clouds - mix of positions to prevent gap
+  for (let i = 0; i < 100; i++) {
     const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
     const tint = tintColors[i % tintColors.length];
 
@@ -84,10 +84,10 @@ function startConsultingClouds() {
 
     const cloud = new THREE.Mesh(cloudGeo, material);
 
-    // ALL clouds start BELOW screen - rise up fully visible
+    // Mix of below-screen and in-viewport (prevents gap, opacity always 1)
     cloud.position.set(
       (Math.random() - 0.5) * 8,
-      -6 - Math.random() * 3, // Start from -6 to -9 (all below screen)
+      -6 + Math.random() * 8, // Spread from -6 to +2
       -1 - Math.random() * 2
     );
 
@@ -101,67 +101,61 @@ function startConsultingClouds() {
     consultingClouds.push(cloud);
   }
 
-
   console.log("Created", consultingClouds.length, "clouds");
 
   // Animation loop
   let startTime = Date.now();
 
   function animateClouds() {
-  consultingAnimationId = requestAnimationFrame(animateClouds);
-  
-  const elapsed = (Date.now() - startTime) / 1000;
-  
-  // Determine phase
-  let phase = 'peak'; // Default to peak
-  
-  if (elapsed < 1.0) {
-    phase = 'rampup';
-  } else if (elapsed < 5.5) {
-    phase = 'peak';
-  } else if (elapsed < 8.0) {
-    phase = 'taper';
-  } else {
-    phase = 'exit';
-  }
-
-consultingClouds.forEach((cloud) => {
-  cloud.position.y += cloud.userData.riseSpeed;
-  cloud.rotation.z += cloud.userData.rotSpeed;
-
-  // FADE OUT clouds at top edge only (prevents repositioning blink)
-  if (cloud.position.y > 4) {
-    cloud.material.opacity = Math.max(0, 1 - ((cloud.position.y - 4) / 2));
-  } else {
-    // Full opacity everywhere else (clouds rise fully visible from bottom)
-    cloud.material.opacity = 1;
-  }
-
-  // DETERMINISTIC looping based on phase
-  if (cloud.position.y > 6) {
-    if (phase === 'rampup') {
-      // Probabilistic ramp: 0 → 1
-      const loopChance = elapsed / 1.0;
-      if (Math.random() < loopChance) {
-        cloud.position.y = -4 - Math.random() * 2;
-      }
-    } else if (phase === 'peak') {
-      // GUARANTEED loop during peak - NO RANDOMNESS
-      cloud.position.y = -4 - Math.random() * 2;
-    } else if (phase === 'taper') {
-      // Probabilistic taper: 1 → 0
-      const loopChance = 1 - ((elapsed - 5.5) / 2.5);
-      if (Math.random() < loopChance) {
-        cloud.position.y = -4 - Math.random() * 2;
-      }
+    consultingAnimationId = requestAnimationFrame(animateClouds);
+    
+    const elapsed = (Date.now() - startTime) / 1000;
+    
+    // Determine phase
+    let phase = 'peak';
+    
+    if (elapsed < 1.0) {
+      phase = 'rampup';
+    } else if (elapsed < 5.5) {
+      phase = 'peak';
+    } else if (elapsed < 8.0) {
+      phase = 'taper';
+    } else {
+      phase = 'exit';
     }
-    // phase === 'exit': don't loop, let clouds fly off
+
+    consultingClouds.forEach((cloud) => {
+      cloud.position.y += cloud.userData.riseSpeed;
+      cloud.rotation.z += cloud.userData.rotSpeed;
+
+      // FADE OUT clouds at top edge only (prevents repositioning blink)
+      if (cloud.position.y > 4) {
+        cloud.material.opacity = Math.max(0, 1 - ((cloud.position.y - 4) / 2));
+      } else {
+        // Full opacity everywhere else (clouds rise fully visible from bottom)
+        cloud.material.opacity = 1;
+      }
+
+      // DETERMINISTIC looping based on phase
+      if (cloud.position.y > 6) {
+        if (phase === 'rampup') {
+          const loopChance = elapsed / 1.0;
+          if (Math.random() < loopChance) {
+            cloud.position.y = -4 - Math.random() * 2;
+          }
+        } else if (phase === 'peak') {
+          cloud.position.y = -4 - Math.random() * 2;
+        } else if (phase === 'taper') {
+          const loopChance = 1 - ((elapsed - 5.5) / 2.5);
+          if (Math.random() < loopChance) {
+            cloud.position.y = -4 - Math.random() * 2;
+          }
+        }
+      }
+    });
+
+    consultingRenderer.render(consultingScene, camera);
   }
-});
-
-
-  consultingRenderer.render(consultingScene, camera);
-}
 
   animateClouds();
 }
@@ -232,7 +226,7 @@ function startIntroClouds() {
   consultingScene.add(new THREE.AmbientLight(0x1f2937, 0.8));
 
   const loader = new THREE.TextureLoader();
-  const smokeTexture = loader.load("/server/assets/smoke.png");
+  const smokeTexture = loader.load("./assets/smoke.png");
 
   const cloudGeo = new THREE.PlaneGeometry(7, 7);
   consultingClouds = [];
@@ -286,19 +280,14 @@ function startIntroClouds() {
 
   animateIntroClouds();
 
-  // Fade out smoothly before cleanup
+  // Clouds naturally exit - just cleanup, NO FADE
   setTimeout(() => {
     if (consultingOverlay) {
-      consultingOverlay.style.transition = "opacity 1s ease-out";
-      consultingOverlay.style.opacity = "0";
-      
-      setTimeout(() => {
-        consultingOverlay.classList.remove("visible");
-        consultingOverlay.style.opacity = "";
-        stopConsultingClouds();
-      }, 1000);
+      consultingOverlay.style.transition = "none";
+      consultingOverlay.classList.remove("visible");
+      stopConsultingClouds();
     }
-  }, 2500);
+  }, 3000);
 }
 
 async function fetchFortune(question) {
@@ -330,7 +319,7 @@ if (form && questionInput) {
       consultingOverlay.style.opacity = "1";
       consultingOverlay.style.transition = "none";
       console.log("Overlay visible, about to start clouds");
-      setTimeout(startConsultingClouds, 100);
+      setTimeout(startConsultingClouds, 0); // INSTANT - no delay
     }
 
     setTimeout(() => {
@@ -359,40 +348,38 @@ if (form && questionInput) {
     console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
 
     setTimeout(() => {
-      if (appInner) {
-        appInner.style.display = "none";
-      }
-      
-      const fortuneView = document.getElementById("fortune-view");
-      const fortuneText = document.getElementById("fortune-text");
-      
-      if (fortuneView && fortuneText) {
-        fortuneText.textContent = fortune;
-        fortuneView.style.display = "block";
-
-        shouldLoop = false;
-        
-        const appRoot = document.getElementById("app-root");
-        if (appRoot) {
-          appRoot.style.top = "0";
+      // DELAY screen switch by 1 second (clouds cover transition)
+      setTimeout(() => {
+        if (appInner) {
+          appInner.style.display = "none";
         }
         
-        setTimeout(() => {
-          fortuneView.classList.add("visible");
-        }, 50);
-      }
+        const fortuneView = document.getElementById("fortune-view");
+        const fortuneText = document.getElementById("fortune-text");
+        
+        if (fortuneView && fortuneText) {
+          fortuneText.textContent = fortune;
+          fortuneView.style.display = "block";
+
+          shouldLoop = false;
+          
+          const appRoot = document.getElementById("app-root");
+          if (appRoot) {
+            appRoot.style.top = "0";
+          }
+          
+          setTimeout(() => {
+            fortuneView.classList.add("visible");
+          }, 50);
+        }
+      }, 1000);
 
       if (consultingOverlay) {
         setTimeout(() => {
-          consultingOverlay.style.transition = "opacity 1.5s ease-out";
-          consultingOverlay.style.opacity = "0";
-          
-          setTimeout(() => {
-            consultingOverlay.classList.remove("visible");
-            consultingOverlay.style.opacity = "";
-            stopConsultingClouds();
-          }, 1500);
-        }, 9000);
+          consultingOverlay.classList.remove("visible");
+          consultingOverlay.style.opacity = "";
+          stopConsultingClouds();
+        }, 10000);
       }
 
     }, remainingTime);
@@ -433,7 +420,7 @@ window.addEventListener("DOMContentLoaded", () => {
       aboutBtn.style.transition = "opacity 1s ease";
       aboutBtn.style.opacity = "1";
     }
-  }, 1000);
+  }, 1500); // UI fades in at 1.5s
 });
 
 // About modal functionality
