@@ -295,7 +295,7 @@ async function generateShareImage(fortuneText) {
 
   const cardH = Math.round(cardW * (cardImg.height / cardImg.width));
   const GAP = 50;
-  const CTA_H = 140;
+  const CTA_H = 160;
   const H = FRAME + cardH + GAP + CTA_H + FRAME;
 
   const canvas = document.createElement('canvas');
@@ -329,9 +329,9 @@ async function generateShareImage(fortuneText) {
   const textCenterX = cardX + cardW / 2;
   const textAreaTop = cardY + cardH * 0.25;
   const textAreaH = cardH * 0.57;
-  const maxTextWidth = cardW * 0.68;
-  const fontSize = 46;
-  const lineHeight = 64;
+  const maxTextWidth = cardW * 0.70;
+  const fontSize = 62;
+  const lineHeight = 82;
 
   ctx.font = `italic ${fontSize}px "Cormorant Garamond", Georgia, serif`;
   ctx.fillStyle = '#2e241a';
@@ -345,14 +345,14 @@ async function generateShareImage(fortuneText) {
   // CTA — larger and more prominent
   const ctaStartY = cardY + cardH + GAP;
 
-  ctx.font = '48px "Cinzel", serif';
+  ctx.font = 'bold 56px "Cinzel", serif';
   ctx.fillStyle = '#a855f7';
   ctx.textAlign = 'center';
-  ctx.fillText('What does your fate hold?', W / 2, ctaStartY + 52);
+  ctx.fillText('What does your fate hold?', W / 2, ctaStartY + 58);
 
-  ctx.font = '36px "Cinzel", serif';
-  ctx.fillStyle = '#5ee7ff';
-  ctx.fillText('askesmeralda.com', W / 2, ctaStartY + 52 + 65);
+  ctx.font = '26px "Cinzel", serif';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+  ctx.fillText('askesmeralda.com', W / 2, ctaStartY + 58 + 64);
 
   return canvas;
 }
