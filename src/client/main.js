@@ -354,6 +354,12 @@ if (form && questionInput) {
   });
 }
 
+window.addEventListener("beforeunload", () => {
+  const fortuneView = document.getElementById("fortune-view");
+  if (fortuneView) fortuneView.style.visibility = "hidden";
+  if (consultingOverlay) consultingOverlay.style.visibility = "hidden";
+});
+
 window.addEventListener("resize", () => {
   const logo = document.getElementById("splash-title");
   if (logo) {
