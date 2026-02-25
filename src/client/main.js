@@ -14,20 +14,17 @@ let consultingRenderer = null;
 let consultingClouds = [];
 let consultingAnimationId = null;
 let shouldLoop = true;
+let consultingRespawn = true;
 
 // Create the consulting cloud scene
 function startConsultingClouds() {
-  console.log("startConsultingClouds called");
-  console.log("consultingCanvas:", consultingCanvas);
-  
-  if (!consultingCanvas) {
-    console.error("Canvas not found!");
-    return;
-  }
-  
-  console.log("Creating consulting clouds...");
+  if (!consultingCanvas) return;
 
-  // Set up renderer
+  // Bypass CSS opacity transition — canvas instantly visible.
+  // Clouds start below the screen so nothing pops into view.
+  consultingCanvas.style.opacity = '1';
+  consultingCanvas.style.transition = 'none';
+
   consultingRenderer = new THREE.WebGLRenderer({
     canvas: consultingCanvas,
     antialias: true,
@@ -48,7 +45,6 @@ function startConsultingClouds() {
   camera.position.set(0, -1.5, 2);
   camera.lookAt(0, 0, 0);
 
-  // Dramatic lighting
   const purpleLight = new THREE.PointLight(0xd946ff, 8, 120);
   purpleLight.position.set(-2, 1, 5);
 
@@ -61,103 +57,68 @@ function startConsultingClouds() {
   consultingScene.add(purpleLight, cyanLight, pinkLight);
   consultingScene.add(new THREE.AmbientLight(0x1f2937, 0.8));
 
-  // Load smoke texture
-  const loader = new THREE.TextureLoader();
-  const smokeTexture = loader.load("./assets/smoke.png");
-
   const cloudGeo = new THREE.PlaneGeometry(7, 7);
   consultingClouds = [];
 
-  // Spawn 100 clouds - mix of positions to prevent gap
-  for (let i = 0; i < 100; i++) {
-    const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
-    const tint = tintColors[i % tintColors.length];
+  // Load texture first — no frames render until texture is ready.
+  const loader = new THREE.TextureLoader();
+  loader.load("./assets/smoke.png", (smokeTexture) => {
+    for (let i = 0; i < 100; i++) {
+      const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
+      const tint = tintColors[i % tintColors.length];
 
-    const material = new THREE.MeshLambertMaterial({
-      map: smokeTexture,
-      color: tint,
-      transparent: true,
-      opacity: 1,
-      depthWrite: false,
-      side: THREE.DoubleSide
-    });
+      const material = new THREE.MeshLambertMaterial({
+        map: smokeTexture,
+        color: tint,
+        transparent: true,
+        opacity: 1,
+        depthWrite: false,
+        depthTest: false,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide
+      });
 
-    const cloud = new THREE.Mesh(cloudGeo, material);
+      const cloud = new THREE.Mesh(cloudGeo, material);
 
-    // Mix of below-screen and in-viewport (prevents gap, opacity always 1)
-    cloud.position.set(
-      (Math.random() - 0.5) * 8,
-      -6 + Math.random() * 8, // Spread from -6 to +2
-      -1 - Math.random() * 2
-    );
+      // All clouds start below the visible area.
+      // Visible bottom ≈ y=0; cloud top edge = centre + 3.5.
+      // Centres spread over -4…-12 for a staggered rising wave.
+      cloud.position.set(
+        (Math.random() - 0.5) * 8,
+        -4 - Math.random() * 8,
+        -1 - Math.random() * 2
+      );
 
-    cloud.rotation.z = Math.random() * Math.PI * 2;
+      cloud.rotation.z = Math.random() * Math.PI * 2;
+      cloud.userData.riseSpeed = 0.025 + Math.random() * 0.015;
+      cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
 
-    // Store upward velocity for animation
-    cloud.userData.riseSpeed = 0.025 + Math.random() * 0.015;
-    cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
-
-    consultingScene.add(cloud);
-    consultingClouds.push(cloud);
-  }
-
-  console.log("Created", consultingClouds.length, "clouds");
-
-  // Animation loop
-  let startTime = Date.now();
-
-  function animateClouds() {
-    consultingAnimationId = requestAnimationFrame(animateClouds);
-    
-    const elapsed = (Date.now() - startTime) / 1000;
-    
-    // Determine phase
-    let phase = 'peak';
-    
-    if (elapsed < 1.0) {
-      phase = 'rampup';
-    } else if (elapsed < 5.5) {
-      phase = 'peak';
-    } else if (elapsed < 8.0) {
-      phase = 'taper';
-    } else {
-      phase = 'exit';
+      consultingScene.add(cloud);
+      consultingClouds.push(cloud);
     }
 
-    consultingClouds.forEach((cloud) => {
-      cloud.position.y += cloud.userData.riseSpeed;
-      cloud.rotation.z += cloud.userData.rotSpeed;
+    function animateClouds() {
+      consultingAnimationId = requestAnimationFrame(animateClouds);
 
-      // FADE OUT clouds at top edge only (prevents repositioning blink)
-      if (cloud.position.y > 4) {
-        cloud.material.opacity = Math.max(0, 1 - ((cloud.position.y - 4) / 2));
-      } else {
-        // Full opacity everywhere else (clouds rise fully visible from bottom)
-        cloud.material.opacity = 1;
-      }
+      consultingClouds.forEach((cloud) => {
+        cloud.position.y += cloud.userData.riseSpeed;
+        cloud.rotation.z += cloud.userData.rotSpeed;
 
-      // DETERMINISTIC looping based on phase
-      if (cloud.position.y > 6) {
-        if (phase === 'rampup') {
-          const loopChance = elapsed / 1.0;
-          if (Math.random() < loopChance) {
-            cloud.position.y = -4 - Math.random() * 2;
-          }
-        } else if (phase === 'peak') {
-          cloud.position.y = -4 - Math.random() * 2;
-        } else if (phase === 'taper') {
-          const loopChance = 1 - ((elapsed - 5.5) / 2.5);
-          if (Math.random() < loopChance) {
-            cloud.position.y = -4 - Math.random() * 2;
+        // Threshold y>10: even the deepest clouds (z≈-3, visible top≈y4.8)
+        // have their bottom edge (centre-3.5=6.5) safely off-screen.
+        if (cloud.position.y > 10) {
+          if (consultingRespawn) {
+            cloud.position.y = -5 - Math.random() * 3;
+            cloud.position.x = (Math.random() - 0.5) * 8;
           }
         }
-      }
-    });
+      });
 
-    consultingRenderer.render(consultingScene, camera);
-  }
+      consultingRenderer.render(consultingScene, camera);
+    }
 
-  animateClouds();
+    animateClouds();
+  });
 }
 
 // Clean up the consulting scene
@@ -182,16 +143,14 @@ function stopConsultingClouds() {
 
   consultingClouds = [];
   consultingScene = null;
+  consultingRespawn = true;
+  consultingCanvas.style.opacity = '';
+  consultingCanvas.style.transition = '';
 }
 
-// Intro clouds - cover screen on load, then exit
+// Intro clouds - cover screen on load, then exit naturally
 function startIntroClouds() {
-  console.log("Starting intro clouds...");
-  
-  if (!consultingCanvas) {
-    console.error("Canvas not found!");
-    return;
-  }
+  if (!consultingCanvas) return;
 
   consultingRenderer = new THREE.WebGLRenderer({
     canvas: consultingCanvas,
@@ -225,69 +184,76 @@ function startIntroClouds() {
   consultingScene.add(purpleLight, cyanLight, pinkLight);
   consultingScene.add(new THREE.AmbientLight(0x1f2937, 0.8));
 
-  const loader = new THREE.TextureLoader();
-  const smokeTexture = loader.load("./assets/smoke.png");
-
   const cloudGeo = new THREE.PlaneGeometry(7, 7);
   consultingClouds = [];
 
-  for (let i = 0; i < 40; i++) {
-    const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
-    const tint = tintColors[i % tintColors.length];
+  const loader = new THREE.TextureLoader();
+  // Load texture first — animation starts only in the callback so no
+  // frames render with flat-coloured planes before the texture arrives.
+  loader.load("./assets/smoke.png", (smokeTexture) => {
 
-    const material = new THREE.MeshLambertMaterial({
-      map: smokeTexture,
-      color: tint,
-      transparent: true,
-      opacity: 1,
-      depthWrite: false,
-      side: THREE.DoubleSide
-    });
+    for (let i = 0; i < 60; i++) {
+      const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
+      const tint = tintColors[i % tintColors.length];
 
-    const cloud = new THREE.Mesh(cloudGeo, material);
+      const material = new THREE.MeshLambertMaterial({
+        map: smokeTexture,
+        color: tint,
+        transparent: true,
+        opacity: 1,
+        depthWrite: false,
+        depthTest: false,
+        side: THREE.DoubleSide
+      });
 
-    cloud.position.set(
-      (Math.random() - 0.5) * 8,
-      (Math.random() - 0.5) * 6,
-      -1 - Math.random() * 2
-    );
+      const cloud = new THREE.Mesh(cloudGeo, material);
 
-    cloud.rotation.z = Math.random() * Math.PI * 2;
+      // All clouds start with their centres in the visible area (y 0–4).
+      // A 7-unit-tall plane centred at y=0 already spans the full visible
+      // height, so the screen is covered immediately and no cloud centre
+      // is ever below the screen edge at spawn (which caused the blink).
+      cloud.position.set(
+        (Math.random() - 0.5) * 10,
+        Math.random() * 4,
+        -1 - Math.random() * 2
+      );
 
-    cloud.userData.riseSpeed = 0.025 + Math.random() * 0.015;
-    cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
+      cloud.rotation.z = Math.random() * Math.PI * 2;
+      cloud.userData.riseSpeed = 0.025 + Math.random() * 0.015;
+      cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
 
-    consultingScene.add(cloud);
-    consultingClouds.push(cloud);
-  }
-
-  console.log("Created", consultingClouds.length, "intro clouds");
-
-  let startTime = Date.now();
-
-  function animateIntroClouds() {
-    consultingAnimationId = requestAnimationFrame(animateIntroClouds);
-    
-    const elapsed = (Date.now() - startTime) / 1000;
-
-    consultingClouds.forEach((cloud) => {
-      cloud.position.y += cloud.userData.riseSpeed;
-      cloud.rotation.z += cloud.userData.rotSpeed;
-    });
-
-    consultingRenderer.render(consultingScene, camera);
-  }
-
-  animateIntroClouds();
-
-  // Clouds naturally exit - just cleanup, NO FADE
-  setTimeout(() => {
-    if (consultingOverlay) {
-      consultingOverlay.style.transition = "none";
-      consultingOverlay.classList.remove("visible");
-      stopConsultingClouds();
+      consultingScene.add(cloud);
+      consultingClouds.push(cloud);
     }
-  }, 3000);
+
+    // Release pointer-events early so the user isn't locked out too long,
+    // even while the last few clouds are still drifting off the top.
+    setTimeout(() => {
+      if (consultingOverlay) consultingOverlay.style.pointerEvents = 'none';
+    }, 2500);
+
+    function animateIntroClouds() {
+      consultingAnimationId = requestAnimationFrame(animateIntroClouds);
+
+      let allGone = true;
+      consultingClouds.forEach((cloud) => {
+        cloud.position.y += cloud.userData.riseSpeed;
+        cloud.rotation.z += cloud.userData.rotSpeed;
+        // Threshold is 9 (not 6) so the full 7-unit-tall plane clears the
+        // top edge before we consider it gone.
+        if (cloud.position.y < 9) allGone = false;
+      });
+
+      consultingRenderer.render(consultingScene, camera);
+
+      if (allGone) {
+        consultingOverlay.classList.remove("visible");
+        stopConsultingClouds();
+      }
+    }
+
+    animateIntroClouds();
+  });
 }
 
 async function fetchFortune(question) {
@@ -315,6 +281,7 @@ if (form && questionInput) {
     const cloudsStartTime = Date.now();
 
     if (consultingOverlay) {
+      consultingOverlay.style.pointerEvents = ''; // clear any intro override
       consultingOverlay.classList.add("visible");
       consultingOverlay.style.opacity = "1";
       consultingOverlay.style.transition = "none";
@@ -361,7 +328,7 @@ if (form && questionInput) {
           fortuneText.textContent = fortune;
           fortuneView.style.display = "block";
 
-          shouldLoop = false;
+          consultingRespawn = false; // clouds drift off naturally, revealing the card
           
           const appRoot = document.getElementById("app-root");
           if (appRoot) {

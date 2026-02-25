@@ -253,11 +253,6 @@ label {
   opacity: 1;
 }
 
-/* When visible, animate the smoke in */
-.consulting-overlay.visible .consulting-smoke {
-  animation: smoke-rise-in 1.1s ease-out forwards,
-             smoke-drift 6s ease-in-out infinite alternate;
-}
 
 /* === FORTUNE REVEAL VIEW === */
 .fortune-view {
