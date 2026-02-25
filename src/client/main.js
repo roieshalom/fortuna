@@ -286,7 +286,18 @@ function wrapText(ctx, text, maxWidth) {
 }
 
 async function generateShareImage(fortuneText) {
-  const W = 1080, H = 1920;
+  const W = 1080;
+  const FRAME = 60;  // padding on all sides
+  const cardW = W - FRAME * 2; // 960px — fills the width
+
+  await document.fonts.ready;
+  const cardImg = await loadImg('./assets/fortune-card.png');
+
+  const cardH = Math.round(cardW * (cardImg.height / cardImg.width));
+  const GAP = 50;
+  const CTA_H = 140;
+  const H = FRAME + cardH + GAP + CTA_H + FRAME;
+
   const canvas = document.createElement('canvas');
   canvas.width = W;
   canvas.height = H;
@@ -296,52 +307,31 @@ async function generateShareImage(fortuneText) {
   ctx.fillStyle = '#020617';
   ctx.fillRect(0, 0, W, H);
 
-  // Atmospheric glows
-  const purpleGlow = ctx.createRadialGradient(180, 480, 0, 180, 480, 750);
-  purpleGlow.addColorStop(0, 'rgba(168, 85, 247, 0.2)');
+  // Atmospheric glows — top-left purple, bottom-right cyan
+  const purpleGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, 700);
+  purpleGlow.addColorStop(0, 'rgba(168, 85, 247, 0.25)');
   purpleGlow.addColorStop(1, 'rgba(168, 85, 247, 0)');
   ctx.fillStyle = purpleGlow;
   ctx.fillRect(0, 0, W, H);
 
-  const cyanGlow = ctx.createRadialGradient(900, 1450, 0, 900, 1450, 650);
-  cyanGlow.addColorStop(0, 'rgba(94, 231, 255, 0.15)');
+  const cyanGlow = ctx.createRadialGradient(W, H, 0, W, H, 600);
+  cyanGlow.addColorStop(0, 'rgba(94, 231, 255, 0.2)');
   cyanGlow.addColorStop(1, 'rgba(94, 231, 255, 0)');
   ctx.fillStyle = cyanGlow;
   ctx.fillRect(0, 0, W, H);
 
-  await document.fonts.ready;
-  const [logoImg, cardImg] = await Promise.all([
-    loadImg('./assets/logo.png'),
-    loadImg('./assets/fortune-card.png')
-  ]);
-
-  // Layout
-  const logoW = 440;
-  const logoH = logoW * (logoImg.height / logoImg.width);
-  const cardW = 750;
-  const cardH = cardW * (cardImg.height / cardImg.width);
-  const ctaH = 110;
-  const gap1 = 60;
-  const gap2 = 80;
-  const totalH = logoH + gap1 + cardH + gap2 + ctaH;
-  const startY = (H - totalH) / 2;
-
-  const logoX = (W - logoW) / 2;
-  const logoY = startY;
-  const cardX = (W - cardW) / 2;
-  const cardY = logoY + logoH + gap1;
-  const ctaY = cardY + cardH + gap2;
-
-  ctx.drawImage(logoImg, logoX, logoY, logoW, logoH);
+  // Card
+  const cardX = FRAME;
+  const cardY = FRAME;
   ctx.drawImage(cardImg, cardX, cardY, cardW, cardH);
 
-  // Fortune text — positioned using same proportions as the CSS card padding
+  // Fortune text — matching CSS card padding proportions (top 25%, sides 15%, bottom 18%)
   const textCenterX = cardX + cardW / 2;
   const textAreaTop = cardY + cardH * 0.25;
   const textAreaH = cardH * 0.57;
   const maxTextWidth = cardW * 0.68;
-  const fontSize = 38;
-  const lineHeight = 54;
+  const fontSize = 46;
+  const lineHeight = 64;
 
   ctx.font = `italic ${fontSize}px "Cormorant Garamond", Georgia, serif`;
   ctx.fillStyle = '#2e241a';
@@ -352,14 +342,17 @@ async function generateShareImage(fortuneText) {
   const textStartY = textAreaTop + (textAreaH - totalTextH) / 2 + fontSize * 0.8;
   lines.forEach((line, i) => ctx.fillText(line, textCenterX, textStartY + i * lineHeight));
 
-  // CTA
-  ctx.font = '36px "Cinzel", serif';
-  ctx.fillStyle = 'rgba(168, 85, 247, 0.95)';
-  ctx.fillText('What does your fate hold?', W / 2, ctaY + 44);
+  // CTA — larger and more prominent
+  const ctaStartY = cardY + cardH + GAP;
 
-  ctx.font = '28px "Cinzel", serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-  ctx.fillText('askesmeralda.com', W / 2, ctaY + 100);
+  ctx.font = '48px "Cinzel", serif';
+  ctx.fillStyle = '#a855f7';
+  ctx.textAlign = 'center';
+  ctx.fillText('What does your fate hold?', W / 2, ctaStartY + 52);
+
+  ctx.font = '36px "Cinzel", serif';
+  ctx.fillStyle = '#5ee7ff';
+  ctx.fillText('askesmeralda.com', W / 2, ctaStartY + 52 + 65);
 
   return canvas;
 }
