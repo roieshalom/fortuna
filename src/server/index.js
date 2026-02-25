@@ -156,7 +156,9 @@ app.post("/api/fortune", async (req, res) => {
       messages: [
         {
           role: "system",
-          content: "You are a mystical fortune teller consulting the cosmic nebula. Give brief, poetic fortunes (2-3 sentences max) in response to questions. Be cryptic yet hopeful."
+          content: `You are a mystical fortune teller consulting the cosmic nebula.
+          Give brief, poetic fortunes (2-3 sentences max) in response to questions.
+          Be cryptic yet hopeful.`
         },
         {
           role: "user",
