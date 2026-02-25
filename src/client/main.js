@@ -15,6 +15,7 @@ let consultingClouds = [];
 let consultingAnimationId = null;
 let shouldLoop = true;
 let consultingRespawn = true;
+let currentFortune = '';
 
 // Create the consulting cloud scene
 function startConsultingClouds() {
@@ -256,6 +257,145 @@ function startIntroClouds() {
   });
 }
 
+// ── Share image helpers ────────────────────────────────────────────────────
+
+function loadImg(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+function wrapText(ctx, text, maxWidth) {
+  const words = text.split(' ');
+  const lines = [];
+  let line = '';
+  for (const word of words) {
+    const test = line + (line ? ' ' : '') + word;
+    if (ctx.measureText(test).width > maxWidth && line !== '') {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+async function generateShareImage(fortuneText) {
+  const W = 1080, H = 1920;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#020617';
+  ctx.fillRect(0, 0, W, H);
+
+  // Atmospheric glows
+  const purpleGlow = ctx.createRadialGradient(180, 480, 0, 180, 480, 750);
+  purpleGlow.addColorStop(0, 'rgba(168, 85, 247, 0.2)');
+  purpleGlow.addColorStop(1, 'rgba(168, 85, 247, 0)');
+  ctx.fillStyle = purpleGlow;
+  ctx.fillRect(0, 0, W, H);
+
+  const cyanGlow = ctx.createRadialGradient(900, 1450, 0, 900, 1450, 650);
+  cyanGlow.addColorStop(0, 'rgba(94, 231, 255, 0.15)');
+  cyanGlow.addColorStop(1, 'rgba(94, 231, 255, 0)');
+  ctx.fillStyle = cyanGlow;
+  ctx.fillRect(0, 0, W, H);
+
+  await document.fonts.ready;
+  const [logoImg, cardImg] = await Promise.all([
+    loadImg('./assets/logo.png'),
+    loadImg('./assets/fortune-card.png')
+  ]);
+
+  // Layout
+  const logoW = 440;
+  const logoH = logoW * (logoImg.height / logoImg.width);
+  const cardW = 750;
+  const cardH = cardW * (cardImg.height / cardImg.width);
+  const ctaH = 110;
+  const gap1 = 60;
+  const gap2 = 80;
+  const totalH = logoH + gap1 + cardH + gap2 + ctaH;
+  const startY = (H - totalH) / 2;
+
+  const logoX = (W - logoW) / 2;
+  const logoY = startY;
+  const cardX = (W - cardW) / 2;
+  const cardY = logoY + logoH + gap1;
+  const ctaY = cardY + cardH + gap2;
+
+  ctx.drawImage(logoImg, logoX, logoY, logoW, logoH);
+  ctx.drawImage(cardImg, cardX, cardY, cardW, cardH);
+
+  // Fortune text — positioned using same proportions as the CSS card padding
+  const textCenterX = cardX + cardW / 2;
+  const textAreaTop = cardY + cardH * 0.25;
+  const textAreaH = cardH * 0.57;
+  const maxTextWidth = cardW * 0.68;
+  const fontSize = 38;
+  const lineHeight = 54;
+
+  ctx.font = `italic ${fontSize}px "Cormorant Garamond", Georgia, serif`;
+  ctx.fillStyle = '#2e241a';
+  ctx.textAlign = 'center';
+
+  const lines = wrapText(ctx, fortuneText, maxTextWidth);
+  const totalTextH = lines.length * lineHeight;
+  const textStartY = textAreaTop + (textAreaH - totalTextH) / 2 + fontSize * 0.8;
+  lines.forEach((line, i) => ctx.fillText(line, textCenterX, textStartY + i * lineHeight));
+
+  // CTA
+  ctx.font = '36px "Cinzel", serif';
+  ctx.fillStyle = 'rgba(168, 85, 247, 0.95)';
+  ctx.fillText('What does your fate hold?', W / 2, ctaY + 44);
+
+  ctx.font = '28px "Cinzel", serif';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.fillText('askesmeralda.com', W / 2, ctaY + 100);
+
+  return canvas;
+}
+
+async function shareFortuneImage(fortuneText) {
+  const btn = document.getElementById('share-btn');
+  if (btn) { btn.textContent = 'Preparing...'; btn.disabled = true; }
+
+  try {
+    const canvas = await generateShareImage(fortuneText);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const file = new File([blob], 'my-fortune.png', { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        text: 'Find out your fate: https://askesmeralda.com'
+      });
+    } else {
+      // Fallback: download
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'my-fortune.png';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') console.error('Share failed:', err);
+  } finally {
+    if (btn) { btn.textContent = 'Share your fortune'; btn.disabled = false; }
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+
 async function fetchFortune(question) {
   const res = await fetch("/api/fortune", {
     method: "POST",
@@ -308,6 +448,7 @@ if (form && questionInput) {
       console.error(err);
       fortune = "The nebula is silent. Try again.";
     }
+    currentFortune = fortune;
 
     const elapsed = Date.now() - cloudsStartTime;
     const minDisplayTime = 4000;
@@ -395,6 +536,14 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }, 1500); // UI fades in at 1.5s
 });
+
+// Share button
+const shareBtn = document.getElementById('share-btn');
+if (shareBtn) {
+  shareBtn.addEventListener('click', () => {
+    if (currentFortune) shareFortuneImage(currentFortune);
+  });
+}
 
 // About modal functionality
 const aboutBtn = document.getElementById("about-btn");

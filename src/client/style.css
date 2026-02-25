@@ -321,6 +321,24 @@ label {
   opacity: 0.85;
 }
 
+/* === SHARE BUTTON === */
+.share-btn {
+  display: block;
+  margin: 24px auto 0;
+  width: auto;
+  padding: 10px 32px;
+  background: transparent;
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  color: var(--accent);
+}
+
+.share-btn:hover {
+  background: rgba(168, 85, 247, 0.1);
+  border-color: var(--accent);
+  filter: none;
+  transform: none;
+}
+
 /* === TABLET & DESKTOP ADJUSTMENTS === */
 @media (min-width: 611px) {
   .fortune-card {
