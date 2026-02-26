@@ -249,9 +249,6 @@ label {
   z-index: 0;
 }
 
-.consulting-overlay.visible .consulting-backdrop {
-  opacity: 1;
-}
 
 /* Canvas for 3D clouds in the overlay */
 .consulting-smoke {

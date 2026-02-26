@@ -28,6 +28,14 @@ function startConsultingClouds() {
 
   window.pauseBg?.();
 
+  // Instantly show solid backdrop — hides all content regardless of cloud gaps.
+  // Only done for consulting (not intro), so the intro never goes dark.
+  const backdrop = document.getElementById('consulting-backdrop');
+  if (backdrop) {
+    backdrop.style.transition = 'none';
+    backdrop.style.opacity = '1';
+  }
+
   consultingRenderer = new THREE.WebGLRenderer({
     canvas: consultingCanvas,
     antialias: false,
@@ -89,12 +97,11 @@ function startConsultingClouds() {
 
       const cloud = new THREE.Mesh(cloudGeo, material);
 
-      // Distribute clouds evenly across the full animation range (-12 to +6)
-      // so there are no sparse patches at any point during the animation.
-      const spanY = 18;
+      // Even spread from y=-2 down to y=-12 — all below screen so nothing
+      // pops into view when the texture loads. Backdrop covers content meanwhile.
       cloud.position.set(
         (Math.random() - 0.5) * 8,
-        -12 + (i / cloudCount) * spanY + (Math.random() - 0.5) * 1.5,
+        -2 - (i / cloudCount) * 10 + (Math.random() - 0.5),
         -1 - Math.random() * 2
       );
 
@@ -155,6 +162,8 @@ function stopConsultingClouds() {
   consultingRespawn = true;
   consultingCanvas.style.opacity = '';
   consultingCanvas.style.transition = '';
+  const bd = document.getElementById('consulting-backdrop');
+  if (bd) { bd.style.transition = ''; bd.style.opacity = ''; }
   window.resumeBg?.();
 }
 
@@ -475,9 +484,12 @@ if (form && questionInput) {
 
           consultingRespawn = false; // clouds drift off naturally, revealing the card
 
-          // Fade out the solid backdrop so the card is visible through the cloud canvas
+          // Re-enable transition then fade out backdrop — card visible through cloud canvas
           const backdrop = document.getElementById('consulting-backdrop');
-          if (backdrop) backdrop.style.opacity = '0';
+          if (backdrop) {
+            backdrop.style.transition = 'opacity 0.5s ease';
+            backdrop.style.opacity = '0';
+          }
           
           const appRoot = document.getElementById("app-root");
           if (appRoot) {
