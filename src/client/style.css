@@ -238,6 +238,21 @@ label {
   opacity: 1;
 }
 
+/* Solid backdrop — hides all content instantly, independent of cloud density.
+   Fades out when the fortune card is ready to be revealed. */
+.consulting-backdrop {
+  position: absolute;
+  inset: 0;
+  background: #020617;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 0;
+}
+
+.consulting-overlay.visible .consulting-backdrop {
+  opacity: 1;
+}
+
 /* Canvas for 3D clouds in the overlay */
 .consulting-smoke {
   position: absolute;
@@ -247,6 +262,7 @@ label {
   height: 100%;
   opacity: 0;
   transition: opacity 0.6s ease;
+  z-index: 1;
 }
 
 .consulting-overlay.visible .consulting-smoke {

@@ -71,7 +71,8 @@ function startConsultingClouds() {
   // Load texture first — no frames render until texture is ready.
   const loader = new THREE.TextureLoader();
   loader.load("./assets/smoke.png", (smokeTexture) => {
-    for (let i = 0; i < 30; i++) {
+    const cloudCount = 35;
+    for (let i = 0; i < cloudCount; i++) {
       const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
       const tint = tintColors[i % tintColors.length];
 
@@ -88,12 +89,12 @@ function startConsultingClouds() {
 
       const cloud = new THREE.Mesh(cloudGeo, material);
 
-      // All clouds start below the visible area.
-      // Visible bottom ≈ y=0; cloud top edge = centre + 3.5.
-      // Centres spread over -4…-12 for a staggered rising wave.
+      // Distribute clouds evenly across the full animation range (-12 to +6)
+      // so there are no sparse patches at any point during the animation.
+      const spanY = 18;
       cloud.position.set(
         (Math.random() - 0.5) * 8,
-        -4 - Math.random() * 8,
+        -12 + (i / cloudCount) * spanY + (Math.random() - 0.5) * 1.5,
         -1 - Math.random() * 2
       );
 
@@ -473,6 +474,10 @@ if (form && questionInput) {
           fortuneView.style.display = "block";
 
           consultingRespawn = false; // clouds drift off naturally, revealing the card
+
+          // Fade out the solid backdrop so the card is visible through the cloud canvas
+          const backdrop = document.getElementById('consulting-backdrop');
+          if (backdrop) backdrop.style.opacity = '0';
           
           const appRoot = document.getElementById("app-root");
           if (appRoot) {
