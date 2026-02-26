@@ -357,6 +357,17 @@ label {
   transform: none;
 }
 
+.share-btn.loading {
+  opacity: 0.5;
+  cursor: default;
+  animation: sharePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes sharePulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.25; }
+}
+
 /* === TABLET & DESKTOP ADJUSTMENTS === */
 @media (min-width: 611px) {
   .fortune-card {

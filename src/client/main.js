@@ -370,7 +370,7 @@ async function generateShareImage(fortuneText) {
 
 async function shareFortuneImage(fortuneText) {
   const btn = document.getElementById('share-btn');
-  if (btn) { btn.textContent = 'Preparing...'; btn.disabled = true; }
+  if (btn) { btn.textContent = 'Preparing...'; btn.disabled = true; btn.classList.add('loading'); }
 
   try {
     const canvas = await generateShareImage(fortuneText);
@@ -394,7 +394,7 @@ async function shareFortuneImage(fortuneText) {
   } catch (err) {
     if (err.name !== 'AbortError') console.error('Share failed:', err);
   } finally {
-    if (btn) { btn.textContent = 'Share your fortune'; btn.disabled = false; }
+    if (btn) { btn.textContent = 'Share your fortune'; btn.disabled = false; btn.classList.remove('loading'); }
   }
 }
 
