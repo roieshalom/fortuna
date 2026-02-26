@@ -54,20 +54,17 @@
     <main class="app" id="app-root">
       <!-- INPUT VIEW -->
       <section class="panel app-inner" id="app-inner">
-        <form id="fortune-form">
+        <div id="fortune-form">
           <input
             id="question"
-            name="question"
             type="text"
             placeholder="What do you seek?"
-            required
             autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            spellcheck="false"
+            autocapitalize="sentences"
+            enterkeyhint="send"
           />
-          <button type="submit">Reveal Fortune</button>
-        </form>
+          <button type="button" id="submit-btn">Reveal Fortune</button>
+        </div>
       </section>
 
       <!-- FORTUNE REVEAL VIEW (hidden by default) -->

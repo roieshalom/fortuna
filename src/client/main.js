@@ -3,7 +3,6 @@ import * as THREE from "https://unpkg.com/three@0.158.0/build/three.module.js";
 
 console.log("main.js loaded");
 
-const form = document.getElementById("fortune-form");
 const questionInput = document.getElementById("question");
 const appInner = document.getElementById("app-inner");
 const consultingOverlay = document.getElementById("consulting-overlay");
@@ -416,12 +415,9 @@ async function fetchFortune(question) {
   return data.fortune || "The nebula murmurs, but softly.";
 }
 
-if (form && questionInput) {
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const question = questionInput.value.trim();
-    if (!question) return;
+async function handleSubmit() {
+  const question = questionInput.value.trim();
+  if (!question) return;
 
     const cloudsStartTime = Date.now();
 
@@ -510,7 +506,13 @@ if (form && questionInput) {
       }
 
     }, remainingTime);
+}
 
+const submitBtn = document.getElementById("submit-btn");
+if (submitBtn) submitBtn.addEventListener("click", handleSubmit);
+if (questionInput) {
+  questionInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleSubmit();
   });
 }
 
