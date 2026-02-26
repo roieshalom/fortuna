@@ -26,13 +26,15 @@ function startConsultingClouds() {
   consultingCanvas.style.opacity = '1';
   consultingCanvas.style.transition = 'none';
 
+  window.pauseBg?.();
+
   consultingRenderer = new THREE.WebGLRenderer({
     canvas: consultingCanvas,
-    antialias: true,
+    antialias: false,
     alpha: true
   });
   consultingRenderer.setSize(window.innerWidth, window.innerHeight);
-  consultingRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  consultingRenderer.setPixelRatio(1);
   consultingRenderer.setClearColor(0x000000, 0);
 
   consultingScene = new THREE.Scene();
@@ -64,7 +66,7 @@ function startConsultingClouds() {
   // Load texture first — no frames render until texture is ready.
   const loader = new THREE.TextureLoader();
   loader.load("./assets/smoke.png", (smokeTexture) => {
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 30; i++) {
       const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
       const tint = tintColors[i % tintColors.length];
 
@@ -147,6 +149,7 @@ function stopConsultingClouds() {
   consultingRespawn = true;
   consultingCanvas.style.opacity = '';
   consultingCanvas.style.transition = '';
+  window.resumeBg?.();
 }
 
 // Intro clouds - cover screen on load, then exit naturally

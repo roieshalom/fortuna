@@ -159,7 +159,7 @@
     const cloudGeo = new THREE.PlaneGeometry(4, 4);
     const clouds = [];
 
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 20; i++) {
       const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
       const tint = tintColors[i % tintColors.length];
 
@@ -174,8 +174,8 @@
 
       const cloud = new THREE.Mesh(cloudGeo, material);
 
-      if (i < 20) {
-        const angle = (i / 20) * Math.PI * 2;
+      if (i < 8) {
+        const angle = (i / 8) * Math.PI * 2;
         const radius = 4.3;
         cloud.position.set(
           Math.cos(angle) * radius,
@@ -202,8 +202,9 @@
     }
     window.addEventListener("resize", onResize);
 
+    let bgAnimId;
     function animate() {
-      requestAnimationFrame(animate);
+      bgAnimId = requestAnimationFrame(animate);
 
       clouds.forEach((cloud, i) => {
         const dir = i % 2 === 0 ? 1 : -1;
@@ -213,6 +214,10 @@
       renderer.render(scene, camera);
     }
     animate();
+
+    // Allow main.js to pause/resume background during consulting overlay
+    window.pauseBg = () => { cancelAnimationFrame(bgAnimId); bgAnimId = null; };
+    window.resumeBg = () => { if (!bgAnimId) animate(); };
   </script>
 
   <!-- Your existing app JS -->
