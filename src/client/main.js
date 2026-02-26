@@ -33,7 +33,12 @@ function startConsultingClouds() {
     antialias: false,
     alpha: true
   });
-  consultingRenderer.setSize(window.innerWidth, window.innerHeight);
+  // Use screen.height (full device height) so the canvas covers the viewport
+  // even when the iOS URL bar is visible. Pass false so Three.js doesn't set
+  // inline style.height and override the CSS inset:0 that fills the overlay.
+  const SW = window.screen.width;
+  const SH = window.screen.height;
+  consultingRenderer.setSize(SW, SH, false);
   consultingRenderer.setPixelRatio(1);
   consultingRenderer.setClearColor(0x000000, 0);
 
@@ -41,7 +46,7 @@ function startConsultingClouds() {
 
   const camera = new THREE.PerspectiveCamera(
     45,
-    window.innerWidth / window.innerHeight,
+    SW / SH,
     0.1,
     100
   );
@@ -161,15 +166,17 @@ function startIntroClouds() {
     antialias: true,
     alpha: true
   });
-  consultingRenderer.setSize(window.innerWidth, window.innerHeight);
-  consultingRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const SW = window.screen.width;
+  const SH = window.screen.height;
+  consultingRenderer.setSize(SW, SH, false);
+  consultingRenderer.setPixelRatio(1);
   consultingRenderer.setClearColor(0x000000, 0);
 
   consultingScene = new THREE.Scene();
 
   const camera = new THREE.PerspectiveCamera(
     45,
-    window.innerWidth / window.innerHeight,
+    SW / SH,
     0.1,
     100
   );
