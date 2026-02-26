@@ -1,2 +1,5 @@
 .env
 src/server/fortune-log.json
+.DS_Store
+**/.DS_Store
+.claude/
