@@ -509,12 +509,23 @@ async function handleSubmit() {
 }
 
 const submitBtn = document.getElementById("submit-btn");
+
+function syncSubmitBtn() {
+  if (!submitBtn) return;
+  const empty = !questionInput?.value.trim();
+  submitBtn.disabled = empty;
+  submitBtn.style.opacity = empty ? "0.4" : "";
+  submitBtn.style.cursor = empty ? "default" : "";
+}
+
 if (submitBtn) submitBtn.addEventListener("click", handleSubmit);
 if (questionInput) {
+  questionInput.addEventListener("input", syncSubmitBtn);
   questionInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") handleSubmit();
   });
 }
+syncSubmitBtn();
 
 window.addEventListener("beforeunload", () => {
   const fortuneView = document.getElementById("fortune-view");
