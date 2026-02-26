@@ -28,14 +28,6 @@ function startConsultingClouds() {
 
   window.pauseBg?.();
 
-  // Instantly show solid backdrop — hides all content regardless of cloud gaps.
-  // Only done for consulting (not intro), so the intro never goes dark.
-  const backdrop = document.getElementById('consulting-backdrop');
-  if (backdrop) {
-    backdrop.style.transition = 'none';
-    backdrop.style.opacity = '1';
-  }
-
   consultingRenderer = new THREE.WebGLRenderer({
     canvas: consultingCanvas,
     antialias: false,
@@ -469,7 +461,14 @@ if (form && questionInput) {
     console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
 
     setTimeout(() => {
-      // DELAY screen switch by 1 second (clouds cover transition)
+      // Fade in backdrop now — covers the card switch 1 second from now
+      const backdrop = document.getElementById('consulting-backdrop');
+      if (backdrop) {
+        backdrop.style.transition = 'opacity 0.6s ease';
+        backdrop.style.opacity = '1';
+      }
+
+      // DELAY screen switch by 1 second (backdrop + clouds cover transition)
       setTimeout(() => {
         if (appInner) {
           appInner.style.display = "none";
