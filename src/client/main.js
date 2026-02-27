@@ -502,7 +502,6 @@ async function handleSubmit() {
           
           setTimeout(() => {
             fortuneView.classList.add("visible");
-            prepareShareImage(fortune);
           }, 50);
         }
       }, 1000);
@@ -512,6 +511,7 @@ async function handleSubmit() {
           consultingOverlay.classList.remove("visible");
           consultingOverlay.style.opacity = "";
           stopConsultingClouds();
+          prepareShareImage(fortune);
         }, 10000);
       }
 
