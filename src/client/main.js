@@ -381,6 +381,9 @@ async function prepareShareImage(fortuneText) {
       btn.disabled = false;
       btn.classList.remove('loading');
       btn.classList.add('ready');
+      btn.addEventListener('animationend', () => {
+        btn.classList.remove('ready');
+      }, { once: true });
     }
   } catch (err) {
     console.error('Share image generation failed:', err);
@@ -511,7 +514,7 @@ async function handleSubmit() {
           consultingOverlay.classList.remove("visible");
           consultingOverlay.style.opacity = "";
           stopConsultingClouds();
-          prepareShareImage(fortune);
+          setTimeout(() => prepareShareImage(fortune), 1500);
         }, 10000);
       }
 
