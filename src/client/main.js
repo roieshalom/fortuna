@@ -394,6 +394,7 @@ async function prepareShareImage(fortuneText) {
 async function shareFortuneImage() {
   const blob = pendingShareBlob;
   if (!blob) return;
+  if (typeof clarity === 'function') clarity('event', 'fortune_shared');
   const file = new File([blob], 'my-fortune.png', { type: 'image/png' });
   try {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -431,6 +432,8 @@ async function fetchFortune(question) {
 async function handleSubmit() {
   const question = questionInput.value.trim();
   if (!question) return;
+
+  if (typeof clarity === 'function') clarity('event', 'fortune_submitted');
 
     const cloudsStartTime = Date.now();
 
