@@ -15,6 +15,8 @@ let consultingAnimationId = null;
 let shouldLoop = true;
 let consultingRespawn = true;
 let pendingShareBlob = null;
+let shareImageReadyResolve = null;
+let shareImageReadyPromise = new Promise(resolve => { shareImageReadyResolve = resolve; });
 
 // Create the consulting cloud scene
 function startConsultingClouds() {
@@ -368,31 +370,17 @@ async function generateShareImage(fortuneText) {
   return canvas;
 }
 
-async function prepareShareImage(fortuneText) {
-  const btn = document.getElementById('share-btn');
-  pendingShareBlob = null;
-  if (btn) { btn.disabled = true; btn.classList.add('loading'); btn.classList.remove('ready'); }
-
-  try {
-    const canvas = await generateShareImage(fortuneText);
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-    pendingShareBlob = blob;
-    if (btn) {
-      btn.disabled = false;
-      btn.classList.remove('loading');
-      btn.classList.add('ready');
-      btn.addEventListener('animationend', () => {
-        btn.classList.remove('ready');
-      }, { once: true });
-    }
-  } catch (err) {
-    console.error('Share image generation failed:', err);
-    if (btn) { btn.disabled = false; btn.classList.remove('loading'); }
-  }
-}
-
 async function shareFortuneImage() {
-  const blob = pendingShareBlob;
+  const btn = document.getElementById('share-btn');
+  let blob = pendingShareBlob;
+
+  if (!blob) {
+    // Image still generating — show feedback and wait
+    if (btn) { btn.textContent = 'Generating...'; btn.disabled = true; btn.classList.add('loading'); }
+    blob = await shareImageReadyPromise;
+    if (btn) { btn.textContent = 'Share your fortune'; btn.disabled = false; btn.classList.remove('loading'); }
+  }
+
   if (!blob) return;
   if (typeof clarity === 'function') clarity('event', 'fortune_shared');
   const file = new File([blob], 'my-fortune.png', { type: 'image/png' });
@@ -508,10 +496,16 @@ async function handleSubmit() {
           
           setTimeout(() => {
             fortuneView.classList.add("visible");
-            // Start generating silently in background — will be ready by the time clouds clear
+            // Reset promise for this fortune
+            shareImageReadyPromise = new Promise(resolve => { shareImageReadyResolve = resolve; });
+            pendingShareBlob = null;
+            // Generate silently — resolves promise when done
             generateShareImage(fortune).then(canvas => {
-              canvas.toBlob(blob => { pendingShareBlob = blob; }, 'image/png');
-            }).catch(() => {});
+              canvas.toBlob(blob => {
+                pendingShareBlob = blob;
+                if (shareImageReadyResolve) shareImageReadyResolve(blob);
+              }, 'image/png');
+            }).catch(() => { if (shareImageReadyResolve) shareImageReadyResolve(null); });
           }, 50);
         }
       }, 1000);
@@ -522,17 +516,9 @@ async function handleSubmit() {
           consultingOverlay.style.opacity = "";
           stopConsultingClouds();
           const btn = document.getElementById('share-btn');
-          if (pendingShareBlob) {
-            // Already ready — glow immediately
-            if (btn) {
-              btn.disabled = false;
-              btn.classList.remove('loading');
-              btn.classList.add('ready');
-              btn.addEventListener('animationend', () => btn.classList.remove('ready'), { once: true });
-            }
-          } else {
-            // Still generating — show loading bar, glow when done
-            prepareShareImage(fortune);
+          if (btn) {
+            btn.classList.add('ready');
+            btn.addEventListener('animationend', () => btn.classList.remove('ready'), { once: true });
           }
         }, 10000);
       }
