@@ -508,6 +508,10 @@ async function handleSubmit() {
           
           setTimeout(() => {
             fortuneView.classList.add("visible");
+            // Start generating silently in background — will be ready by the time clouds clear
+            generateShareImage(fortune).then(canvas => {
+              canvas.toBlob(blob => { pendingShareBlob = blob; }, 'image/png');
+            }).catch(() => {});
           }, 50);
         }
       }, 1000);
@@ -517,7 +521,19 @@ async function handleSubmit() {
           consultingOverlay.classList.remove("visible");
           consultingOverlay.style.opacity = "";
           stopConsultingClouds();
-          setTimeout(() => prepareShareImage(fortune), 1500);
+          const btn = document.getElementById('share-btn');
+          if (pendingShareBlob) {
+            // Already ready — glow immediately
+            if (btn) {
+              btn.disabled = false;
+              btn.classList.remove('loading');
+              btn.classList.add('ready');
+              btn.addEventListener('animationend', () => btn.classList.remove('ready'), { once: true });
+            }
+          } else {
+            // Still generating — show loading bar, glow when done
+            prepareShareImage(fortune);
+          }
         }, 10000);
       }
 
