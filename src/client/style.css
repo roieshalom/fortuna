@@ -348,6 +348,18 @@ label {
   background: transparent;
   border: 1px solid rgba(168, 85, 247, 0.5);
   color: var(--accent);
+  position: relative;
+  overflow: hidden;
+}
+
+.share-btn::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0;
+  height: 100%;
+  width: 0%;
+  background: rgba(168, 85, 247, 0.2);
+  pointer-events: none;
 }
 
 .share-btn:hover {
@@ -358,14 +370,33 @@ label {
 }
 
 .share-btn.loading {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: default;
-  animation: sharePulse 1.2s ease-in-out infinite;
 }
 
-@keyframes sharePulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 0.25; }
+.share-btn.loading::before {
+  animation: shareProgress 4s ease-out forwards;
+}
+
+@keyframes shareProgress {
+  0%   { width: 0%; }
+  100% { width: 85%; }
+}
+
+.share-btn.ready::before {
+  width: 100%;
+  transition: width 0.15s ease;
+  background: rgba(168, 85, 247, 0.15);
+}
+
+.share-btn.ready {
+  animation: shareReadyGlow 1s ease-out 1 forwards;
+}
+
+@keyframes shareReadyGlow {
+  0%   { box-shadow: none; }
+  35%  { box-shadow: 0 0 18px rgba(168, 85, 247, 0.8), 0 0 36px rgba(168, 85, 247, 0.3); }
+  100% { box-shadow: none; }
 }
 
 /* === TABLET & DESKTOP ADJUSTMENTS === */

@@ -14,7 +14,7 @@ let consultingClouds = [];
 let consultingAnimationId = null;
 let shouldLoop = true;
 let consultingRespawn = true;
-let currentFortune = '';
+let pendingShareBlob = null;
 
 // Create the consulting cloud scene
 function startConsultingClouds() {
@@ -368,22 +368,34 @@ async function generateShareImage(fortuneText) {
   return canvas;
 }
 
-async function shareFortuneImage(fortuneText) {
+async function prepareShareImage(fortuneText) {
   const btn = document.getElementById('share-btn');
-  if (btn) { btn.textContent = 'Preparing...'; btn.disabled = true; btn.classList.add('loading'); }
+  pendingShareBlob = null;
+  if (btn) { btn.disabled = true; btn.classList.add('loading'); btn.classList.remove('ready'); }
 
   try {
     const canvas = await generateShareImage(fortuneText);
     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-    const file = new File([blob], 'my-fortune.png', { type: 'image/png' });
+    pendingShareBlob = blob;
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      btn.classList.add('ready');
+    }
+  } catch (err) {
+    console.error('Share image generation failed:', err);
+    if (btn) { btn.disabled = false; btn.classList.remove('loading'); }
+  }
+}
 
+async function shareFortuneImage() {
+  const blob = pendingShareBlob;
+  if (!blob) return;
+  const file = new File([blob], 'my-fortune.png', { type: 'image/png' });
+  try {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        text: 'Find out your fate: https://askesmeralda.com'
-      });
+      await navigator.share({ files: [file], text: 'Find out your fate: https://askesmeralda.com' });
     } else {
-      // Fallback: download
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -393,8 +405,6 @@ async function shareFortuneImage(fortuneText) {
     }
   } catch (err) {
     if (err.name !== 'AbortError') console.error('Share failed:', err);
-  } finally {
-    if (btn) { btn.textContent = 'Share your fortune'; btn.disabled = false; btn.classList.remove('loading'); }
   }
 }
 
@@ -449,7 +459,6 @@ async function handleSubmit() {
       console.error(err);
       fortune = "The nebula is silent. Try again.";
     }
-    currentFortune = fortune;
 
     const elapsed = Date.now() - cloudsStartTime;
     const minDisplayTime = 4000;
@@ -493,6 +502,7 @@ async function handleSubmit() {
           
           setTimeout(() => {
             fortuneView.classList.add("visible");
+            prepareShareImage(fortune);
           }, 50);
         }
       }, 1000);
@@ -572,9 +582,7 @@ window.addEventListener("DOMContentLoaded", () => {
 // Share button
 const shareBtn = document.getElementById('share-btn');
 if (shareBtn) {
-  shareBtn.addEventListener('click', () => {
-    if (currentFortune) shareFortuneImage(currentFortune);
-  });
+  shareBtn.addEventListener('click', shareFortuneImage);
 }
 
 // About modal functionality
