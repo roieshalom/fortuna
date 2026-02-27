@@ -344,8 +344,8 @@ async function generateShareImage(fortuneText) {
   const fontSize = 62;
   const lineHeight = 82;
 
-  ctx.font = `italic ${fontSize}px "Cormorant Garamond", Georgia, serif`;
-  ctx.fillStyle = '#2e241a';
+  ctx.font = `600 italic ${fontSize}px "Cormorant Garamond", Georgia, serif`;
+  ctx.fillStyle = '#1a1008';
   ctx.textAlign = 'center';
 
   const lines = wrapText(ctx, fortuneText, maxTextWidth);
