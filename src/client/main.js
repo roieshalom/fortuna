@@ -12,18 +12,26 @@ let consultingScene = null;
 let consultingRenderer = null;
 let consultingClouds = [];
 let consultingAnimationId = null;
-let shouldLoop = true;
-let consultingRespawn = true;
+let cloudPhase = 'idle'; // 'ramp' | 'peak' | 'taper' | 'idle'
+let cloudPhaseStartTime = 0;
+let cloudPeakCallback = null;
+let cloudDoneCallback = null;
 let pendingShareBlob = null;
 let shareImageReadyResolve = null;
 let shareImageReadyPromise = new Promise(resolve => { shareImageReadyResolve = resolve; });
 
-// Create the consulting cloud scene
-function startConsultingClouds() {
+// Create the consulting cloud scene.
+// onPeak: fires when ramp completes — full coverage guaranteed, safe to switch content.
+// onDone: fires when taper completes — overlay hidden, animation stopped.
+function startConsultingClouds(onPeak, onDone) {
   if (!consultingCanvas) return;
 
-  // Bypass CSS opacity transition — canvas instantly visible.
-  // Clouds start below the screen so nothing pops into view.
+  cloudPhase = 'ramp';
+  cloudPhaseStartTime = Date.now();
+  cloudPeakCallback = onPeak || null;
+  cloudDoneCallback = onDone || null;
+
+  // Canvas always at full CSS opacity — cloud material opacity + backdrop drive the fade.
   consultingCanvas.style.opacity = '1';
   consultingCanvas.style.transition = 'none';
 
@@ -34,9 +42,6 @@ function startConsultingClouds() {
     antialias: false,
     alpha: true
   });
-  // Use screen.height (full device height) so the canvas covers the viewport
-  // even when the iOS URL bar is visible. Pass false so Three.js doesn't set
-  // inline style.height and override the CSS inset:0 that fills the overlay.
   const SW = window.screen.width;
   const SH = window.screen.height;
   consultingRenderer.setSize(SW, SH, false);
@@ -45,21 +50,14 @@ function startConsultingClouds() {
 
   consultingScene = new THREE.Scene();
 
-  const camera = new THREE.PerspectiveCamera(
-    45,
-    SW / SH,
-    0.1,
-    100
-  );
+  const camera = new THREE.PerspectiveCamera(45, SW / SH, 0.1, 100);
   camera.position.set(0, -1.5, 2);
   camera.lookAt(0, 0, 0);
 
   const purpleLight = new THREE.PointLight(0xd946ff, 8, 120);
   purpleLight.position.set(-2, 1, 5);
-
   const cyanLight = new THREE.PointLight(0x5ee7ff, 8, 120);
   cyanLight.position.set(2, -1, 5);
-
   const pinkLight = new THREE.PointLight(0xff6ad5, 6, 100);
   pinkLight.position.set(0, -2, 4);
 
@@ -69,10 +67,9 @@ function startConsultingClouds() {
   const cloudGeo = new THREE.PlaneGeometry(7, 7);
   consultingClouds = [];
 
-  // Load texture first — no frames render until texture is ready.
   const loader = new THREE.TextureLoader();
   loader.load("./assets/smoke.png", (smokeTexture) => {
-    const cloudCount = 35;
+    const cloudCount = 80;
     for (let i = 0; i < cloudCount; i++) {
       const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
       const tint = tintColors[i % tintColors.length];
@@ -81,7 +78,7 @@ function startConsultingClouds() {
         map: smokeTexture,
         color: tint,
         transparent: true,
-        opacity: 1,
+        opacity: 0, // driven by masterOpacity each frame
         depthWrite: false,
         depthTest: false,
         blending: THREE.AdditiveBlending,
@@ -90,37 +87,88 @@ function startConsultingClouds() {
 
       const cloud = new THREE.Mesh(cloudGeo, material);
 
-      // Even spread from y=-2 down to y=-12 — all below screen so nothing
-      // pops into view when the texture loads. Backdrop covers content meanwhile.
+      // Spread from y=3 (in visible zone) down to y=-17 so the top third of
+      // clouds are already above FADE_IN_Y at t=0 — visible coverage starts
+      // immediately as masterOpacity ramps, with no visible blank moment.
       cloud.position.set(
         (Math.random() - 0.5) * 8,
-        -2 - (i / cloudCount) * 10 + (Math.random() - 0.5),
+        3 - (i / cloudCount) * 20 + (Math.random() - 0.5),
         -1 - Math.random() * 2
       );
 
       cloud.rotation.z = Math.random() * Math.PI * 2;
-      cloud.userData.riseSpeed = 0.025 + Math.random() * 0.015;
+      cloud.userData.riseSpeed = 0.022 + Math.random() * 0.015;
       cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
+      cloud.userData.indOpacity = 0; // per-cloud fade; driven each frame
 
       consultingScene.add(cloud);
       consultingClouds.push(cloud);
     }
 
+    const RAMP_DURATION = 3000;  // ms to fade in to full opacity
+    const TAPER_DURATION = 4500; // ms to fade out after content switch
+    const FADE_IN_Y = -4.0;     // y where a rising cloud starts fading in
+    const FADE_OUT_Y = 5.0;     // y where an exiting cloud starts fading out
+    const FADE_IN_SPEED = 0.04; // indOpacity per frame (≈25 frames / 0.4s)
+    const FADE_OUT_SPEED = 0.04;
+
     function animateClouds() {
       consultingAnimationId = requestAnimationFrame(animateClouds);
+
+      const now = Date.now();
+      const elapsed = now - cloudPhaseStartTime;
+      let masterOpacity = 1;
+
+      if (cloudPhase === 'ramp') {
+        masterOpacity = Math.min(1, elapsed / RAMP_DURATION);
+        if (elapsed >= RAMP_DURATION) {
+          cloudPhase = 'peak';
+          cloudPhaseStartTime = now;
+          if (cloudPeakCallback) { cloudPeakCallback(); cloudPeakCallback = null; }
+        }
+      } else if (cloudPhase === 'peak') {
+        masterOpacity = 1;
+      } else if (cloudPhase === 'taper') {
+        masterOpacity = Math.max(0, 1 - elapsed / TAPER_DURATION);
+        if (elapsed >= TAPER_DURATION) {
+          consultingOverlay.classList.remove("visible");
+          consultingOverlay.style.opacity = "";
+          const cb = cloudDoneCallback;
+          cloudDoneCallback = null;
+          stopConsultingClouds();
+          if (cb) cb();
+          return; // stop loop — stopConsultingClouds cancelled the next frame
+        }
+      }
+
+      // Backdrop darkens with clouds; at peak it fully blocks content for the card switch.
+      const backdrop = document.getElementById('consulting-backdrop');
+      if (backdrop) {
+        backdrop.style.transition = 'none';
+        backdrop.style.opacity = masterOpacity.toString();
+      }
 
       consultingClouds.forEach((cloud) => {
         cloud.position.y += cloud.userData.riseSpeed;
         cloud.rotation.z += cloud.userData.rotSpeed;
 
-        // Threshold y>10: even the deepest clouds (z≈-3, visible top≈y4.8)
-        // have their bottom edge (centre-3.5=6.5) safely off-screen.
-        if (cloud.position.y > 10) {
-          if (consultingRespawn) {
-            cloud.position.y = -5 - Math.random() * 3;
-            cloud.position.x = (Math.random() - 0.5) * 8;
+        // Per-cloud fade: smooth entry from below and exit at top.
+        // During taper, masterOpacity drives the global fade — indOpacity stays fixed.
+        if (cloudPhase === 'ramp' || cloudPhase === 'peak') {
+          if (cloud.position.y > FADE_OUT_Y) {
+            // Fade out as cloud exits the top; respawn the moment it's invisible.
+            cloud.userData.indOpacity = Math.max(0, cloud.userData.indOpacity - FADE_OUT_SPEED);
+            if (cloud.userData.indOpacity <= 0) {
+              cloud.position.y = -4.5 - Math.random() * 4;
+              cloud.position.x = (Math.random() - 0.5) * 8;
+            }
+          } else if (cloud.position.y > FADE_IN_Y) {
+            // Fade in as cloud enters the visible area from below.
+            cloud.userData.indOpacity = Math.min(1, cloud.userData.indOpacity + FADE_IN_SPEED);
           }
         }
+
+        cloud.material.opacity = masterOpacity * cloud.userData.indOpacity;
       });
 
       consultingRenderer.render(consultingScene, camera);
@@ -152,7 +200,9 @@ function stopConsultingClouds() {
 
   consultingClouds = [];
   consultingScene = null;
-  consultingRespawn = true;
+  cloudPhase = 'idle';
+  cloudPeakCallback = null;
+  cloudDoneCallback = null;
   consultingCanvas.style.opacity = '';
   consultingCanvas.style.transition = '';
   const bd = document.getElementById('consulting-backdrop');
@@ -423,107 +473,91 @@ async function handleSubmit() {
 
   if (typeof clarity === 'function') clarity('event', 'fortune_submitted');
 
-    const cloudsStartTime = Date.now();
+  // Show overlay immediately
+  if (consultingOverlay) {
+    consultingOverlay.style.pointerEvents = '';
+    consultingOverlay.classList.add("visible");
+    consultingOverlay.style.opacity = "1";
+    consultingOverlay.style.transition = "none";
+  }
 
-    if (consultingOverlay) {
-      consultingOverlay.style.pointerEvents = ''; // clear any intro override
-      consultingOverlay.classList.add("visible");
-      consultingOverlay.style.opacity = "1";
-      consultingOverlay.style.transition = "none";
-      console.log("Overlay visible, about to start clouds");
-      setTimeout(startConsultingClouds, 0); // INSTANT - no delay
+  // Logo fades out at 2.2s during ramp — canvas is covering the form at this point,
+  // so no app-consulting class needed (form stays still, canvas covers it naturally).
+  setTimeout(() => {
+    const logo = document.getElementById("splash-title");
+    if (logo) {
+      logo.style.transition = "opacity 1.2s ease";
+      logo.style.opacity = "0";
+    }
+  }, 2200);
+
+  // Coordinate: switch fires when BOTH peak is reached AND API is ready
+  let peakReached = false;
+  let fortuneReady = false;
+  let fortuneResult = null;
+
+  function doSwitch() {
+    if (!peakReached || !fortuneReady) return;
+
+    // Clouds and backdrop are at full opacity (peak) — swap content, invisible to user.
+    if (appInner) appInner.style.display = "none";
+
+    const fortuneView = document.getElementById("fortune-view");
+    const fortuneTextEl = document.getElementById("fortune-text");
+    if (fortuneView && fortuneTextEl) {
+      fortuneTextEl.textContent = fortuneResult;
+      fortuneView.style.display = "block";
     }
 
-    setTimeout(() => {
-      if (appInner) {
-        appInner.classList.add("app-consulting");
-      }
-      
-      const logo = document.getElementById("splash-title");
-      if (logo) {
-        logo.style.transition = "opacity 1.2s ease";
-        logo.style.opacity = "0";
-      }
-    }, 2200);
+    const appRoot = document.getElementById("app-root");
+    if (appRoot) appRoot.style.top = "0";
 
-    let fortune;
-    try {
-      fortune = await fetchFortune(question);
-    } catch (err) {
-      console.error(err);
-      fortune = "The nebula is silent. Try again.";
+    // Kick off card fade-in (0.8s CSS transition) — still fully hidden by peak clouds+backdrop.
+    setTimeout(() => {
+      if (fortuneView) fortuneView.classList.add("visible");
+      shareImageReadyPromise = new Promise(resolve => { shareImageReadyResolve = resolve; });
+      pendingShareBlob = null;
+      generateShareImage(fortuneResult).then(canvas => {
+        canvas.toBlob(blob => {
+          pendingShareBlob = blob;
+          if (shareImageReadyResolve) shareImageReadyResolve(blob);
+        }, 'image/png');
+      }).catch(() => { if (shareImageReadyResolve) shareImageReadyResolve(null); });
+    }, 50);
+
+    // Wait for card CSS transition to complete (0.8s + 100ms buffer), then begin taper.
+    // Card CSS transition: 50ms lead-in + 800ms ease = 850ms total.
+    // Wait 2000ms so card is fully settled and visible before clouds start clearing.
+    setTimeout(() => {
+      cloudPhase = 'taper';
+      cloudPhaseStartTime = Date.now();
+    }, 2000);
+  }
+
+  // Start clouds: onPeak fires doSwitch (with API), onDone fires the share glow
+  setTimeout(() => startConsultingClouds(
+    () => { peakReached = true; doSwitch(); },
+    () => {
+      const btn = document.getElementById('share-btn');
+      if (btn) {
+        btn.classList.add('ready');
+        btn.addEventListener('animationend', () => btn.classList.remove('ready'), { once: true });
+      }
     }
+  ), 0);
 
-    const elapsed = Date.now() - cloudsStartTime;
-    const minDisplayTime = 4000;
-    const remainingTime = Math.max(0, minDisplayTime - elapsed);
-    console.log("API took:", elapsed, "ms. Waiting additional:", remainingTime, "ms");
+  // API call runs in parallel with the ramp animation
+  let fortune;
+  try {
+    fortune = await fetchFortune(question);
+  } catch (err) {
+    console.error(err);
+    fortune = "The nebula is silent. Try again.";
+  }
 
-    setTimeout(() => {
-      // Fade in backdrop now — covers the card switch 1 second from now
-      const backdrop = document.getElementById('consulting-backdrop');
-      if (backdrop) {
-        backdrop.style.transition = 'opacity 0.6s ease';
-        backdrop.style.opacity = '1';
-      }
-
-      // DELAY screen switch by 1 second (backdrop + clouds cover transition)
-      setTimeout(() => {
-        if (appInner) {
-          appInner.style.display = "none";
-        }
-        
-        const fortuneView = document.getElementById("fortune-view");
-        const fortuneText = document.getElementById("fortune-text");
-        
-        if (fortuneView && fortuneText) {
-          fortuneText.textContent = fortune;
-          fortuneView.style.display = "block";
-
-          consultingRespawn = false; // clouds drift off naturally, revealing the card
-
-          // Re-enable transition then fade out backdrop — card visible through cloud canvas
-          const backdrop = document.getElementById('consulting-backdrop');
-          if (backdrop) {
-            backdrop.style.transition = 'opacity 0.5s ease';
-            backdrop.style.opacity = '0';
-          }
-          
-          const appRoot = document.getElementById("app-root");
-          if (appRoot) {
-            appRoot.style.top = "0";
-          }
-          
-          setTimeout(() => {
-            fortuneView.classList.add("visible");
-            // Reset promise for this fortune
-            shareImageReadyPromise = new Promise(resolve => { shareImageReadyResolve = resolve; });
-            pendingShareBlob = null;
-            // Generate silently — resolves promise when done
-            generateShareImage(fortune).then(canvas => {
-              canvas.toBlob(blob => {
-                pendingShareBlob = blob;
-                if (shareImageReadyResolve) shareImageReadyResolve(blob);
-              }, 'image/png');
-            }).catch(() => { if (shareImageReadyResolve) shareImageReadyResolve(null); });
-          }, 50);
-        }
-      }, 1000);
-
-      if (consultingOverlay) {
-        setTimeout(() => {
-          consultingOverlay.classList.remove("visible");
-          consultingOverlay.style.opacity = "";
-          stopConsultingClouds();
-          const btn = document.getElementById('share-btn');
-          if (btn) {
-            btn.classList.add('ready');
-            btn.addEventListener('animationend', () => btn.classList.remove('ready'), { once: true });
-          }
-        }, 10000);
-      }
-
-    }, remainingTime);
+  fortuneResult = fortune;
+  fortuneReady = true;
+  doSwitch();
 }
 
 const submitBtn = document.getElementById("submit-btn");
