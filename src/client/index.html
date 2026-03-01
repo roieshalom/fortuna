@@ -72,16 +72,17 @@
       <!-- INPUT VIEW -->
       <section class="panel app-inner" id="app-inner">
         <div id="fortune-form">
-          <input
+          <div
             id="question"
-            type="search"
-            placeholder="What do you seek?"
-            autocomplete="off"
-            autocorrect="off"
+            contenteditable="true"
+            role="textbox"
+            aria-label="What do you seek?"
+            aria-multiline="false"
             autocapitalize="sentences"
-            spellcheck="false"
             enterkeyhint="send"
-          />
+            spellcheck="true"
+            data-placeholder="What do you seek?"
+          ></div>
           <button type="button" id="submit-btn">Reveal Fortune</button>
         </div>
       </section>

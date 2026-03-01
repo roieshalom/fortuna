@@ -468,7 +468,7 @@ async function fetchFortune(question) {
 }
 
 async function handleSubmit() {
-  const question = questionInput.value.trim();
+  const question = questionInput.textContent.trim();
   if (!question) return;
 
   if (typeof clarity === 'function') clarity('event', 'fortune_submitted');
@@ -564,7 +564,8 @@ const submitBtn = document.getElementById("submit-btn");
 
 function syncSubmitBtn() {
   if (!submitBtn) return;
-  const empty = !questionInput?.value.trim();
+  const empty = !questionInput?.textContent.trim();
+  questionInput?.classList.toggle("is-empty", empty);
   submitBtn.disabled = empty;
   submitBtn.style.opacity = empty ? "0.4" : "";
   submitBtn.style.cursor = empty ? "default" : "";
@@ -572,9 +573,23 @@ function syncSubmitBtn() {
 
 if (submitBtn) submitBtn.addEventListener("click", handleSubmit);
 if (questionInput) {
+  questionInput.classList.add("is-empty");
   questionInput.addEventListener("input", syncSubmitBtn);
   questionInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") handleSubmit();
+    if (e.key === "Enter") {
+      e.preventDefault(); // prevent newline in contenteditable
+      handleSubmit();
+    }
+  });
+  questionInput.addEventListener("paste", (e) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    selection.deleteFromDocument();
+    selection.getRangeAt(0).insertNode(document.createTextNode(text));
+    selection.collapseToEnd();
+    syncSubmitBtn();
   });
 }
 syncSubmitBtn();
