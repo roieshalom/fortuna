@@ -319,6 +319,8 @@ label {
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
+  color-scheme: light;
+  forced-color-adjust: none;
 }
 
 .fortune-text {
@@ -326,6 +328,7 @@ label {
   font-size: 1.2rem;
   font-weight: 400;
   color: #1a1008;
+  -webkit-text-fill-color: #1a1008;
   text-align: center;
   display: block;
   padding: 0;
