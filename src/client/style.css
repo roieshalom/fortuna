@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Macondo&display=swap');
 
 :root {
+  color-scheme: light;
   --bg: #020617;
   --panel: rgba(15, 23, 42, 0.9);
   --accent: #a855f7;
