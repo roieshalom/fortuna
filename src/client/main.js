@@ -400,9 +400,10 @@ async function generateShareImage(fortuneText) {
   ctx.fillStyle = '#1a1008';
   ctx.textAlign = 'center';
 
-  const lines = wrapText(ctx, fortuneText, maxTextWidth);
+  const maxLines = 7;
+  const lines = wrapText(ctx, fortuneText, maxTextWidth).slice(0, maxLines);
   const totalTextH = lines.length * lineHeight;
-  const textStartY = textAreaTop + (textAreaH - totalTextH) / 2 + fontSize * 0.8;
+  const textStartY = textAreaTop + Math.max(0, (textAreaH - totalTextH) / 2) + fontSize * 0.8;
   lines.forEach((line, i) => ctx.fillText(line, textCenterX, textStartY + i * lineHeight));
 
   // CTA — larger and more prominent
