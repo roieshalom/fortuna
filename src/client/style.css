@@ -69,6 +69,23 @@ canvas {
   display: block;
 }
 
+/* === SUBTITLE LINE === */
+.ask-subtitle {
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-size: 0.92rem;
+  color: #d4af7a;
+  text-align: center;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+
+@media (max-width: 610px) {
+  .ask-subtitle {
+    font-size: 0.84rem;
+  }
+}
+
 /* === APP CONTAINER === */
 .app {
   position: relative; /* Changed from fixed */
