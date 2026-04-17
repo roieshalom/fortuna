@@ -158,7 +158,7 @@ function startConsultingClouds(onPeak, onDone) {
             }
           } else if (cloud.position.y > FADE_IN_Y) {
             // Fade in as cloud enters the visible area from below.
-            cloud.userData.indOpacity = Math.min(1, cloud.userData.indOpacity + FADE_IN_SPEED);
+            cloud.userData.indOpacity = Math.min(0.45, cloud.userData.indOpacity + FADE_IN_SPEED);
           }
         }
 
@@ -244,10 +244,9 @@ function startIntroClouds() {
         map: smokeTexture,
         color: tint,
         transparent: true,
-        opacity: 1,
+        opacity: 0.85,
         depthWrite: false,
         depthTest: false,
-        blending: THREE.AdditiveBlending,
         side: THREE.DoubleSide
       });
 
