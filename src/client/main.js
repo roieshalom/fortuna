@@ -20,6 +20,11 @@ let pendingShareBlob = null;
 let shareImageReadyResolve = null;
 let shareImageReadyPromise = new Promise(resolve => { shareImageReadyResolve = resolve; });
 
+// Pre-load smoke texture once — reused by both intro and consulting clouds
+const isMobile = window.innerWidth < 768;
+let smokeTexture = null;
+new THREE.TextureLoader().load("./assets/smoke.png", t => { smokeTexture = t; });
+
 // Create the consulting cloud scene.
 // onPeak: fires when ramp completes — full coverage guaranteed, safe to switch content.
 // onDone: fires when taper completes — overlay hidden, animation stopped.
@@ -42,8 +47,8 @@ function startConsultingClouds(onPeak, onDone) {
     antialias: false,
     alpha: true
   });
-  const SW = window.screen.width;
-  const SH = window.screen.height;
+  const SW = window.innerWidth;
+  const SH = window.innerHeight;
   consultingRenderer.setSize(SW, SH, false);
   consultingRenderer.setPixelRatio(1);
   consultingRenderer.setClearColor(0x000000, 0);
@@ -54,31 +59,20 @@ function startConsultingClouds(onPeak, onDone) {
   camera.position.set(0, -1.5, 2);
   camera.lookAt(0, 0, 0);
 
-  const purpleLight = new THREE.PointLight(0xd946ff, 8, 120);
-  purpleLight.position.set(-2, 1, 5);
-  const cyanLight = new THREE.PointLight(0x5ee7ff, 8, 120);
-  cyanLight.position.set(2, -1, 5);
-  const pinkLight = new THREE.PointLight(0xff6ad5, 6, 100);
-  pinkLight.position.set(0, -2, 4);
-
-  consultingScene.add(purpleLight, cyanLight, pinkLight);
-  consultingScene.add(new THREE.AmbientLight(0x1f2937, 0.8));
-
   const cloudGeo = new THREE.PlaneGeometry(7, 7);
   consultingClouds = [];
 
-  const loader = new THREE.TextureLoader();
-  loader.load("./assets/smoke.png", (smokeTexture) => {
-    const cloudCount = 80;
+  const spawnClouds = (smokeTexture) => {
+    const cloudCount = isMobile ? 40 : 80;
     for (let i = 0; i < cloudCount; i++) {
       const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
       const tint = tintColors[i % tintColors.length];
 
-      const material = new THREE.MeshLambertMaterial({
+      const material = new THREE.MeshBasicMaterial({
         map: smokeTexture,
         color: tint,
         transparent: true,
-        opacity: 0, // driven by masterOpacity each frame
+        opacity: 0,
         depthWrite: false,
         depthTest: false,
         blending: THREE.AdditiveBlending,
@@ -175,7 +169,13 @@ function startConsultingClouds(onPeak, onDone) {
     }
 
     animateClouds();
-  });
+  };
+
+  if (smokeTexture) {
+    spawnClouds(smokeTexture);
+  } else {
+    new THREE.TextureLoader().load("./assets/smoke.png", spawnClouds);
+  }
 }
 
 // Clean up the consulting scene
@@ -193,7 +193,7 @@ function stopConsultingClouds() {
   consultingClouds.forEach((cloud) => {
     if (cloud.geometry) cloud.geometry.dispose();
     if (cloud.material) {
-      if (cloud.material.map) cloud.material.map.dispose();
+      // Don't dispose cloud.material.map — smokeTexture is shared/cached
       cloud.material.dispose();
     }
   });
@@ -216,57 +216,38 @@ function startIntroClouds() {
 
   consultingRenderer = new THREE.WebGLRenderer({
     canvas: consultingCanvas,
-    antialias: true,
+    antialias: false,
     alpha: true
   });
-  const SW = window.screen.width;
-  const SH = window.screen.height;
+  const SW = window.innerWidth;
+  const SH = window.innerHeight;
   consultingRenderer.setSize(SW, SH, false);
   consultingRenderer.setPixelRatio(1);
   consultingRenderer.setClearColor(0x000000, 0);
 
   consultingScene = new THREE.Scene();
 
-  const camera = new THREE.PerspectiveCamera(
-    45,
-    SW / SH,
-    0.1,
-    100
-  );
+  const camera = new THREE.PerspectiveCamera(45, SW / SH, 0.1, 100);
   camera.position.set(0, -1.5, 2);
   camera.lookAt(0, 0, 0);
-
-  const purpleLight = new THREE.PointLight(0xd946ff, 8, 120);
-  purpleLight.position.set(-2, 1, 5);
-
-  const cyanLight = new THREE.PointLight(0x5ee7ff, 8, 120);
-  cyanLight.position.set(2, -1, 5);
-
-  const pinkLight = new THREE.PointLight(0xff6ad5, 6, 100);
-  pinkLight.position.set(0, -2, 4);
-
-  consultingScene.add(purpleLight, cyanLight, pinkLight);
-  consultingScene.add(new THREE.AmbientLight(0x1f2937, 0.8));
 
   const cloudGeo = new THREE.PlaneGeometry(7, 7);
   consultingClouds = [];
 
-  const loader = new THREE.TextureLoader();
-  // Load texture first — animation starts only in the callback so no
-  // frames render with flat-coloured planes before the texture arrives.
-  loader.load("./assets/smoke.png", (smokeTexture) => {
-
-    for (let i = 0; i < 60; i++) {
+  const spawnIntroClouds = (smokeTexture) => {
+    const cloudCount = isMobile ? 30 : 60;
+    for (let i = 0; i < cloudCount; i++) {
       const tintColors = [0xd946ff, 0xff6ad5, 0x5ee7ff];
       const tint = tintColors[i % tintColors.length];
 
-      const material = new THREE.MeshLambertMaterial({
+      const material = new THREE.MeshBasicMaterial({
         map: smokeTexture,
         color: tint,
         transparent: true,
         opacity: 1,
         depthWrite: false,
         depthTest: false,
+        blending: THREE.AdditiveBlending,
         side: THREE.DoubleSide
       });
 
@@ -317,7 +298,13 @@ function startIntroClouds() {
     }
 
     animateIntroClouds();
-  });
+  };
+
+  if (smokeTexture) {
+    spawnIntroClouds(smokeTexture);
+  } else {
+    new THREE.TextureLoader().load("./assets/smoke.png", spawnIntroClouds);
+  }
 }
 
 // ── Share image helpers ────────────────────────────────────────────────────
