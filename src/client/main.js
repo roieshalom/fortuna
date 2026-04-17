@@ -468,10 +468,82 @@ async function fetchFortune(question) {
   return data.fortune || "The nebula murmurs, but softly.";
 }
 
+function isMetaQuestion(text) {
+  const t = text.toLowerCase().trim();
+  return [
+    /^(hi|hello|hey|sup|yo)[\s!?.]*$/,
+    /^test[\s!?.]*$/,
+    /can i ask/,
+    /what can i ask/,
+    /how does this work/,
+    /what (are|is) (you|this|esmeralda)/,
+    /are you (real|ai|a bot|a robot|fake)/,
+    /who are you/,
+    /what do you do/,
+    /how (do|does) (this|it|you) work/,
+  ].some(p => p.test(t));
+}
+
+const META_RESPONSES = [
+  "Yes — ask me about the choice you keep avoiding, the person you can't stop thinking about, the door you're afraid to open. Whatever you've been carrying. I'm listening.",
+  "Anything you're willing to bring. Love, money, a decision, a fear. Ask what you already know but won't say out loud.",
+  "The question you're carrying right now — that one. Ask me that.",
+  "Whatever keeps you up at night. I've heard worse. I've seen further.",
+  "Start with what matters most. Everything else will follow.",
+];
+
+function showMetaHint() {
+  const hint = document.getElementById('meta-hint');
+  const hintText = document.getElementById('meta-hint-text');
+  if (!hint || !hintText) return;
+
+  // Show overlay immediately
+  if (consultingOverlay) {
+    consultingOverlay.style.pointerEvents = '';
+    consultingOverlay.classList.add('visible');
+    consultingOverlay.style.opacity = '1';
+    consultingOverlay.style.transition = 'none';
+  }
+
+  startConsultingClouds(
+    () => {
+      // Peak: swap input for hint
+      questionInput.style.display = 'none';
+      document.getElementById('submit-btn').style.display = 'none';
+      hintText.textContent = META_RESPONSES[Math.floor(Math.random() * META_RESPONSES.length)];
+      hint.classList.add('visible');
+
+      // Begin taper
+      setTimeout(() => {
+        cloudPhase = 'taper';
+        cloudPhaseStartTime = Date.now();
+      }, 500);
+    },
+    null
+  );
+}
+
+function hideMetaHint() {
+  const hint = document.getElementById('meta-hint');
+  if (!hint) return;
+  hint.classList.remove('visible');
+  questionInput.style.display = '';
+  document.getElementById('submit-btn').style.display = '';
+  questionInput.textContent = '';
+  syncSubmitBtn();
+  questionInput.focus();
+}
+
 async function handleSubmit() {
   const question = questionInput.textContent.trim();
   if (!question) return;
 
+  if (isMetaQuestion(question)) {
+    showMetaHint();
+    return;
+  }
+
+  hideMetaHint();
   if (typeof clarity === 'function') clarity('event', 'fortune_submitted');
 
   // Show overlay immediately
@@ -573,6 +645,8 @@ function syncSubmitBtn() {
 }
 
 if (submitBtn) submitBtn.addEventListener("click", handleSubmit);
+const metaGotIt = document.getElementById('meta-got-it');
+if (metaGotIt) metaGotIt.addEventListener('click', hideMetaHint);
 if (questionInput) {
   questionInput.classList.add("is-empty");
   questionInput.addEventListener("input", syncSubmitBtn);

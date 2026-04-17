@@ -483,6 +483,43 @@ label {
   }
 }
 
+/* === META HINT === */
+#meta-hint {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+#meta-hint.visible {
+  display: flex;
+}
+
+#meta-hint-text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 1.15rem;
+  color: rgba(212, 175, 122, 0.9);
+  text-align: center;
+  line-height: 1.7;
+  margin: 0;
+  padding: 30px 12px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  background: rgba(15, 23, 42, 0.7);
+}
+
+#meta-got-it {
+  background: transparent;
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
 /* === ABOUT BUTTON === */
 .about-btn {
   position: fixed;
