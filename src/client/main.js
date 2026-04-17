@@ -457,18 +457,9 @@ async function fetchFortune(question) {
 
 function isMetaQuestion(text) {
   const t = text.toLowerCase().trim();
-  return [
-    /^(hi|hello|hey|sup|yo)[\s!?.]*$/,
-    /^test[\s!?.]*$/,
-    /can i ask/,
-    /what can i ask/,
-    /how does this work/,
-    /what (are|is) (you|this|esmeralda)/,
-    /are you (real|ai|a bot|a robot|fake)/,
-    /who are you/,
-    /what do you do/,
-    /how (do|does) (this|it|you) work/,
-  ].some(p => p.test(t));
+  // Only catch dead-obvious English greetings/tests client-side for instant feedback.
+  // Everything else (including other languages) goes to the API where Esmeralda handles it.
+  return /^(hi|hello|hey|sup|yo|test)[\s!?.]*$/.test(t);
 }
 
 const META_RESPONSES = [
