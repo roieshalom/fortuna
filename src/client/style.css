@@ -496,14 +496,15 @@ label {
 }
 
 #meta-hint-text {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  font-size: 1.15rem;
-  color: rgba(212, 175, 122, 0.9);
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: rgba(235, 210, 165, 0.95);
   text-align: center;
-  line-height: 1.7;
+  line-height: 1.9;
+  letter-spacing: 0.03em;
   margin: 0;
-  padding: 30px 12px;
+  padding: 30px 20px;
   min-height: 120px;
   display: flex;
   align-items: center;
