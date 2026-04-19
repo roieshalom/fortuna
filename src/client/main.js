@@ -458,7 +458,7 @@ function isMetaQuestion(text) {
   const t = text.toLowerCase().trim();
   // Only catch dead-obvious greetings/tests client-side for instant feedback.
   // Everything else goes to the API where Esmeralda handles it in any language.
-  return /^(hi|hello|hey|sup|yo|test|שלום|היי|הי|سلام|مرحبا|hola|bonjour|ciao|hallo|oi)[\s!?.]*$/.test(t);
+  return /^(hi|hello|hey|sup|yo|test|how are you|who are you|what are you|are you real|שלום|היי|הי|מי אתה|מי את|سلام|مرحبا|hola|bonjour|ciao|hallo|oi)[\s!?.]*$/.test(t);
 }
 
 const META_RESPONSES = [
