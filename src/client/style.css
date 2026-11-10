@@ -351,7 +351,7 @@ label {
   position: relative;
   z-index: 1;
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 400;
   color: #1a1008;
   -webkit-text-fill-color: #1a1008;
@@ -479,7 +479,7 @@ label {
   }
   
   .fortune-text {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
   }
 }
 
