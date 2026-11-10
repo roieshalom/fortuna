@@ -539,6 +539,11 @@ async function handleSubmit() {
       logo.style.transition = "opacity 1.2s ease";
       logo.style.opacity = "0";
     }
+    const subtitle = document.querySelector(".ask-subtitle");
+    if (subtitle) {
+      subtitle.style.transition = "opacity 1.2s ease";
+      subtitle.style.opacity = "0";
+    }
   }, 2200);
 
   // Coordinate: switch fires when BOTH peak is reached AND API is ready
@@ -673,7 +678,12 @@ window.addEventListener("DOMContentLoaded", () => {
       logo.style.transition = "opacity 1s ease";
       logo.style.opacity = "1";
     }
-    
+    const subtitle = document.querySelector(".ask-subtitle");
+    if (subtitle) {
+      subtitle.style.transition = "opacity 1s ease";
+      subtitle.style.opacity = "1";
+    }
+
     const mainContainer = document.querySelector(".main-container");
     if (mainContainer) {
       mainContainer.style.transition = "opacity 1s ease";
