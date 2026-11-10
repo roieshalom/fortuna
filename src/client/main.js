@@ -91,7 +91,7 @@ function startConsultingClouds(onPeak, onDone) {
       );
 
       cloud.rotation.z = Math.random() * Math.PI * 2;
-      cloud.userData.riseSpeed = 0.022 + Math.random() * 0.015;
+      cloud.userData.riseSpeed = 0.038 + Math.random() * 0.02;
       cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
       cloud.userData.indOpacity = 0; // per-cloud fade; driven each frame
 
@@ -103,8 +103,8 @@ function startConsultingClouds(onPeak, onDone) {
     const TAPER_DURATION = 4500; // ms to fade out after content switch
     const FADE_IN_Y = -4.0;     // y where a rising cloud starts fading in
     const FADE_OUT_Y = 5.0;     // y where an exiting cloud starts fading out
-    const FADE_IN_SPEED = 0.04; // indOpacity per frame (≈25 frames / 0.4s)
-    const FADE_OUT_SPEED = 0.04;
+    const FADE_IN_SPEED = 0.07; // indOpacity per frame
+    const FADE_OUT_SPEED = 0.07;
 
     function animateClouds() {
       consultingAnimationId = requestAnimationFrame(animateClouds);
@@ -153,7 +153,7 @@ function startConsultingClouds(onPeak, onDone) {
             // Fade out as cloud exits the top; respawn the moment it's invisible.
             cloud.userData.indOpacity = Math.max(0, cloud.userData.indOpacity - FADE_OUT_SPEED);
             if (cloud.userData.indOpacity <= 0) {
-              cloud.position.y = -4.5 - Math.random() * 4;
+              cloud.position.y = -4.3 - Math.random() * 2;
               cloud.position.x = (Math.random() - 0.5) * 8;
             }
           } else if (cloud.position.y > FADE_IN_Y) {
@@ -263,7 +263,7 @@ function startIntroClouds() {
       );
 
       cloud.rotation.z = Math.random() * Math.PI * 2;
-      cloud.userData.riseSpeed = 0.025 + Math.random() * 0.015;
+      cloud.userData.riseSpeed = 0.038 + Math.random() * 0.02;
       cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
 
       consultingScene.add(cloud);
