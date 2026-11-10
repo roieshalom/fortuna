@@ -75,7 +75,7 @@ function startConsultingClouds(onPeak, onDone) {
         opacity: 0,
         depthWrite: false,
         depthTest: false,
-        blending: THREE.AdditiveBlending,
+        blending: THREE.NormalBlending,
         side: THREE.DoubleSide
       });
 
@@ -91,7 +91,7 @@ function startConsultingClouds(onPeak, onDone) {
       );
 
       cloud.rotation.z = Math.random() * Math.PI * 2;
-      cloud.userData.riseSpeed = 0.038 + Math.random() * 0.02;
+      cloud.userData.riseSpeed = 0.055 + Math.random() * 0.025;
       cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
       cloud.userData.indOpacity = 0; // per-cloud fade; driven each frame
 
@@ -158,7 +158,7 @@ function startConsultingClouds(onPeak, onDone) {
             }
           } else if (cloud.position.y > FADE_IN_Y) {
             // Fade in as cloud enters the visible area from below.
-            cloud.userData.indOpacity = Math.min(0.45, cloud.userData.indOpacity + FADE_IN_SPEED);
+            cloud.userData.indOpacity = Math.min(0.28, cloud.userData.indOpacity + FADE_IN_SPEED);
           }
         }
 
@@ -263,7 +263,7 @@ function startIntroClouds() {
       );
 
       cloud.rotation.z = Math.random() * Math.PI * 2;
-      cloud.userData.riseSpeed = 0.038 + Math.random() * 0.02;
+      cloud.userData.riseSpeed = 0.055 + Math.random() * 0.025;
       cloud.userData.rotSpeed = (Math.random() - 0.5) * 0.005;
 
       consultingScene.add(cloud);
